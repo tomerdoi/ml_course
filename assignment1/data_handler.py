@@ -23,8 +23,8 @@ class DataHandler:
             Returns:
                 best_feature (int):     The index of the best feature to split
             """
-            best_feature = None
-            best_info_gain = -1
+            best_feature = 0
+            best_info_gain = 0
             # Compute entropy at node
             node_entropy = self.entropy_calculator.compute_entropy(y[node_indices])
             # Iterate over features
