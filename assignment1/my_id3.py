@@ -166,19 +166,26 @@ class MyID3(BaseEstimator, ClassifierMixin):
 def model_check():
     # check_estimator(LinearSVC())  # passes
     test_gen = check_estimator(MyID3(), True)  # passes
-    tests_to_run = []
     tests_to_skip = [16, 18, 19, 20, 21, 24, 40]  # 1, 12 works, 16-multiclass-skip, 18-multiclass-skip
     # , 19-multiclass-skip, 20-multiclass-skip, 21-regression-skip, 24-regression-skip, 29-works, 40-multiclass-skip
     # 5-complex-num-skip, 6-multiclass-skip, 7-works, 9-works, 11-works, 14-works, 15-works
+    count_passed_tests = 0
+    count_total_tests = 0
     for i, t in enumerate(test_gen):
         try:
+            count_total_tests += 1
             if i in tests_to_skip:
                 continue
             print('Running test %d.' % i)
             t[1](t[0])
             print('test %d passed successfully.' % i)
+            count_passed_tests += 1
         except AssertionError as e:
             print('Test %d failed with %s.' % (i, e))
+    if count_passed_tests + len(tests_to_skip) == count_total_tests:
+        print('check_estimator for MyID3 has completed successfully.')
+    else:
+        print('Failed checking check_estimator on MyID3.')
 
 
 if __name__ == '__main__':
