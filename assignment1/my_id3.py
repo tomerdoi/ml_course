@@ -30,11 +30,11 @@ class MyID3(BaseEstimator, ClassifierMixin):
         self.classes_ = unique_labels(y)
         self.X_ = X
         self.y_ = y
-        self.tree_ = self.build_tree(X, y, depth=0)  # build the decision tree
+        self.tree_ = self.build_tree(X, y, depth=0, node_indices=np.arange(len(X)))  # build the decision tree
         # Return the classifier
         return self
 
-    def build_tree(self, X, y, depth):
+    def build_tree(self, X, y, depth, node_indices):
         """
         Recursive function to build the decision tree.
 
@@ -50,29 +50,27 @@ class MyID3(BaseEstimator, ClassifierMixin):
         data_handler = DataHandler()
         # Check if max depth is reached or if all labels are the same
         if depth == self.max_depth or np.unique(y).shape[0] == 1:
-            return {"leaf": True, "class": np.argmax(np.bincount(y))}
+            return {"leaf": True, "class": np.argmax(np.bincount(y)), 'instances': node_indices}
 
         # Find the best split
-        node_indices = np.arange(X.shape[0])
         best_feature = data_handler.get_best_split(X, y, node_indices)
 
         # If no split found, return a leaf node with the majority class
         if best_feature is None:
-            return {"leaf": True, "class": np.argmax(np.bincount(y))}
+            return {"leaf": True, "class": np.argmax(np.bincount(y)), 'instances': node_indices}
 
         # Split the dataset
         left_indices, right_indices = entropy_calc.split_dataset(X, node_indices, best_feature)
         left_X, left_y = X[left_indices], y[left_indices]
         right_X, right_y = X[right_indices], y[right_indices]
 
-        if len(left_indices) == 0 or len(right_indices) == 0:
-            return {"leaf": True, "class": np.argmax(np.bincount(y))}
         # Recursively build left and right subtrees
-        left_tree = self.build_tree(left_X, left_y, depth + 1)
-        right_tree = self.build_tree(right_X, right_y, depth + 1)
+        left_tree = self.build_tree(left_X, left_y, depth + 1, left_indices)
+        right_tree = self.build_tree(right_X, right_y, depth + 1, right_indices)
 
         # Create a dictionary to represent the current node
-        node = {"leaf": False, "feature": best_feature, "left": left_tree, "right": right_tree}
+        node = {"leaf": False, "feature": best_feature, "left": left_tree, "right": right_tree,
+                'instances': node_indices}
         return node
 
     def predict_proba(self, X):
