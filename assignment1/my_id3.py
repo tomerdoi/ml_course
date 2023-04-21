@@ -88,7 +88,7 @@ class MyID3(BaseEstimator, ClassifierMixin):
         for i, sample in enumerate(X):
             node = self.tree_
             while not node["leaf"]:
-                if sample[node["feature"]] == 1:
+                if sample[node["feature"]] == 0:
                     node = node["left"]
                 else:
                     node = node["right"]
