@@ -2,8 +2,6 @@ import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
-from sklearn.utils.estimator_checks import check_estimator
-from sklearn.svm import LinearSVC
 import warnings
 from sklearn.preprocessing import LabelEncoder
 from entropy_calculator import EntropyCalculator
@@ -12,7 +10,7 @@ warnings.filterwarnings("ignore")
 
 
 class MyID3(BaseEstimator, ClassifierMixin):
-    def __init__(self, max_depth=10):
+    def __init__(self, max_depth=3):
         self.max_depth = max_depth
 
     def convert_labels(self, y):
@@ -67,6 +65,8 @@ class MyID3(BaseEstimator, ClassifierMixin):
         left_X, left_y = X[left_indices], y[left_indices]
         right_X, right_y = X[right_indices], y[right_indices]
 
+        if len(left_indices) == 0 or len(right_indices) == 0:
+            return {"leaf": True, "class": np.argmax(np.bincount(y))}
         # Recursively build left and right subtrees
         left_tree = self.build_tree(left_X, left_y, depth + 1)
         right_tree = self.build_tree(right_X, right_y, depth + 1)
@@ -129,10 +129,6 @@ class MyID3(BaseEstimator, ClassifierMixin):
 
 
 if __name__ == '__main__':
-    # sanity checks
-    # check_estimator(LinearSVC())  # passes
-    # check_estimator(MyID3())
-
     # Create a sample dataset
     X = np.array([
         [0, 1, 1],
