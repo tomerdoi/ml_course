@@ -112,7 +112,7 @@ class EntropyCalculator:
             right_indices = []
             # Iterate over node_indices and split based on feature value
             for i in node_indices:
-                if X[i][feature] == 0:
+                if np.abs(X[i][feature] - 0.0) < np.abs(X[i][feature] - 1.0):
                     left_indices.append(i)
                 else:
                     right_indices.append(i)

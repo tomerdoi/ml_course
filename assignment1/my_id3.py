@@ -1,11 +1,8 @@
-import random
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
-from sklearn.utils.multiclass import unique_labels
 import warnings
-from sklearn.svm import LinearSVC
-from sklearn.preprocessing import LabelEncoder
+from sklearn.exceptions import *
 from entropy_calculator import EntropyCalculator
 from data_handler import DataHandler
 from sklearn.utils.estimator_checks import check_estimator
@@ -17,7 +14,7 @@ class MyID3(BaseEstimator, ClassifierMixin):
         self.max_depth = max_depth
 
     def _more_tags(self):
-        return {'binary_only': True, 'multioutput': False, 'poor_score': True, 'non_deterministic': True}
+        return {'binary_only': True, 'multioutput': False, 'poor_score': True}
 
     def convert_label_predict(self, y_value):
         y_converted = self.binary_to_classes_[y_value]
@@ -44,6 +41,8 @@ class MyID3(BaseEstimator, ClassifierMixin):
     def fit(self, X, y):
         try:
             X, y = check_X_y(X, y)
+            if len(X.shape) != 2:
+                raise ValueError("Reshape your data")
             # Check that X and y have correct shape
             if len(X) != len(y):
                 raise Exception("X and y length are not compatible.")
@@ -53,6 +52,8 @@ class MyID3(BaseEstimator, ClassifierMixin):
                 raise ValueError("0 feature(s) (shape=(%d, 0)) while a minimum of 2 is required." % X.shape[0])
             if len(np.unique(y)) == 1:
                 raise ValueError("Classifier can't train when only one class is present.")
+            if len(np.unique(y)) > 2 and y.dtype == float:
+                raise ValueError("Unknown label type: ")
             y = self.convert_labels_fit(y)
             # Store the classes seen during fit
             self.n_features_in_ = X.shape[1]
@@ -117,12 +118,18 @@ class MyID3(BaseEstimator, ClassifierMixin):
             Returns:
                 Prob (ndarray): Probability matrix of shape (n_samples, n_classes).
             """
+            if len(X.shape) != 2:
+                raise ValueError("Reshape your data")
+            if not hasattr(self, 'classes_'):
+                raise NotFittedError("Fit was not called.")
+            if X.shape[1] != self.n_features_in_:
+                raise ValueError("Number of in features in train is different from number in predict.")
             # Return probability matrix
             Prob = np.zeros((X.shape[0], len(self.classes_)))
             for i, sample in enumerate(X):
                 node = self.tree_
                 while not node["leaf"]:
-                    if sample[node["feature"]] == 0:
+                    if np.abs(sample[node["feature"]] - 0.0) < np.abs(sample[node["feature"]] - 1.0):
                         node = node["left"]
                     else:
                         node = node["right"]
@@ -134,12 +141,16 @@ class MyID3(BaseEstimator, ClassifierMixin):
 
     def predict(self, X):
         try:
+            if not hasattr(self, 'classes_'):
+                raise NotFittedError("Fit was not called.")
             if len(np.unique(self.classes_)) == 1:
                 raise ValueError("Classifier can't predict when only one class is present.")
             X = check_array(X)
+            if len(X.shape) != 2:
+                raise ValueError("Reshape your data")
             # Check if fit has been called
             if X.shape[1] != self.n_features_in_:
-                raise AssertionError("Number of in features in train is different from number in predict.")
+                raise ValueError("Number of in features in train is different from number in predict.")
             check_is_fitted(self)
             # Convert input to numpy array
             X = np.array(X)
@@ -157,14 +168,14 @@ class MyID3(BaseEstimator, ClassifierMixin):
 
     def _predict_instance(self, x, node):
         try:
+            if not hasattr(self, 'classes_'):
+                raise NotFittedError("Fit was not called.")
             if node["leaf"]:
-                if x[0] != int(x[0]):
-                    return random.choice(list(self.classes_))
                 converted_label = self.convert_label_predict(y_value=node["class"])
                 return converted_label
             else:
                 feature = node["feature"]
-                if x[feature] == 0:
+                if np.abs(x[feature] - 0.0) < np.abs(x[feature] - 1.0):
                     return self._predict_instance(x, node["left"])
                 else:
                     return self._predict_instance(x, node["right"])
@@ -175,18 +186,16 @@ class MyID3(BaseEstimator, ClassifierMixin):
 
 def model_check():
     # check_estimator(LinearSVC())  # passes
+    check_estimator(MyID3())  # passes
     test_gen = check_estimator(MyID3(), True)  # passes
-    # tests_to_skip = [16, 18, 19, 20, 21, 24, 40]  # 16-multiclass-skip, 18-multiclass-skip
-    # , 19-multiclass-skip, 20-multiclass-skip, 21-regression-skip, 24-regression-skip, 40-multiclass-skip
-    # tests_to_skip = [18, 19, 20, 21, 24, 40]
-    tests_to_skip = [8]
+    tests_to_skip = []
     tests_to_run = []
     count_passed_tests = 0
     count_total_tests = 0
     for i, t in enumerate(test_gen):
         try:
             count_total_tests += 1
-            if i in tests_to_skip:
+            if i in tests_to_skip:  # or i not in tests_to_run:
                 continue
             print('Running test %d.' % i)
             t[1](t[0])
