@@ -186,7 +186,7 @@ class MyID3(BaseEstimator, ClassifierMixin):
 
 def model_check():
     # check_estimator(LinearSVC())  # passes
-    check_estimator(MyID3())  # passes
+    # check_estimator(MyID3())  # passes
     test_gen = check_estimator(MyID3(), True)  # passes
     tests_to_skip = []
     tests_to_run = []
