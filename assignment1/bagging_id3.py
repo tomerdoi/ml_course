@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore")
 
 
 class MyBaggingID3(BaseEstimator, ClassifierMixin):
-    def __init__(self, n_estimators=10, max_samples=0.9, max_features=0.8, max_depth=3):
+    def __init__(self, n_estimators=10, max_samples=0.8, max_features=0.8, max_depth=20):
         self.n_estimators = n_estimators
         self.max_samples = max_samples
         self.max_features = max_features
