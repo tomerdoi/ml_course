@@ -42,8 +42,6 @@ class MLPipeline:
             # Load dataset
             df = pd.read_csv("/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment1/"
                              "datasets/Fertility Data Set/fertility_Diagnosis.txt", header=None)
-            # Load your data into a numpy array or pandas dataframe
-            # assuming your data is stored in a numpy array called X
             n_bins = 2
             encode = 'ordinal'
             strategy = 'quantile'
@@ -72,9 +70,6 @@ class MLPipeline:
             df = pd.read_csv('/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/'
                              'assignment1/datasets/Heart failure clinical records Data Set/'
                              'heart_failure_clinical_records_dataset.csv')
-            # Separate the target variable from the input features
-            # Load your data into a numpy array or pandas dataframe
-            # assuming your data is stored in a numpy array called X
             n_bins = 2
             encode = 'ordinal'
             strategy = 'quantile'
@@ -97,6 +92,32 @@ class MLPipeline:
             return X_binned, y
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset3_heart_failure_clinical_records.' % e)
+
+    def preprocess_dataset4_ionosphere(self):
+        try:
+            df = pd.read_csv('/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment1/'
+                             'datasets/Ionosphere Data Set/ionosphere.data', header=None)
+            n_bins = 2
+            encode = 'ordinal'
+            strategy = 'quantile'
+            X = df.iloc[:, :-1]
+            y = df.iloc[:, -1]
+            # Identify binary features based on the number of unique values
+            bin_feats = np.where(np.apply_along_axis(lambda x: len(np.unique(x)) == 2, 0, X))[0]
+            nonbin_feats = np.setdiff1d(np.arange(X.shape[1]), bin_feats)
+
+            # Discretize the non-binary features only
+            if len(nonbin_feats) > 0:
+                kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+                X_binned_nonbin = kb.fit_transform(X.loc[:, nonbin_feats])
+                X_binned = np.concatenate((X_binned_nonbin, X.loc[:, bin_feats]), axis=1)
+            else:
+                X_binned = X
+            lb = LabelBinarizer()
+            y = lb.fit_transform(y)
+            return X_binned, y
+        except Exception as e:
+            self.logger.error('Exception %s occurred during preprocess_dataset4_ionosphere.' % e)
 
     def evaluate_model(self, X, y):
         try:
@@ -132,6 +153,8 @@ if __name__ == '__main__':
     X, y = ml_pipeline.preprocess_dataset2_fertility()
     ml_pipeline.evaluate_model(X, y)
     X, y = ml_pipeline.preprocess_dataset3_heart_failure_clinical_records()
+    ml_pipeline.evaluate_model(X, y)
+    X, y = ml_pipeline.preprocess_dataset4_ionosphere()
     ml_pipeline.evaluate_model(X, y)
     pass
 
