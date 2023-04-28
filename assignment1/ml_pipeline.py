@@ -119,6 +119,23 @@ class MLPipeline:
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset4_ionosphere.' % e)
 
+    def preprocess_dataset5_spectf(self):
+        try:
+            df = pd.read_csv('/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment1/'
+                             'datasets/SPECTF Heart Data Set/data.csv', header=None)
+            n_bins = 2
+            encode = 'ordinal'
+            strategy = 'quantile'
+            X = df.iloc[:, 1:]
+            y = df.iloc[:, 0]
+            kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+            X = kb.fit_transform(X)
+            lb = LabelBinarizer()
+            y = lb.fit_transform(y)
+            return X, y
+        except Exception as e:
+            self.logger.error('Exception %s occurred during preprocess_dataset5_spectf.' % e)
+
     def evaluate_model(self, X, y):
         try:
             # Define the models
@@ -135,7 +152,6 @@ class MLPipeline:
             }
             # Define the cross-validation procedure
             cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
-            # Evaluate the models
             # Evaluate the models
             models = {'MyBaggingID3': my_bagging_id3, 'DecisionTreeClassifier': dtc, 'BaggingClassifier': bc}
             wandb.init(project="my-project", name='Assignment1')
@@ -155,6 +171,8 @@ if __name__ == '__main__':
     X, y = ml_pipeline.preprocess_dataset3_heart_failure_clinical_records()
     ml_pipeline.evaluate_model(X, y)
     X, y = ml_pipeline.preprocess_dataset4_ionosphere()
+    ml_pipeline.evaluate_model(X, y)
+    X, y = ml_pipeline.preprocess_dataset5_spectf()
     ml_pipeline.evaluate_model(X, y)
     pass
 
