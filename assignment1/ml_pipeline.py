@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from bagging_id3 import MyBaggingID3
 from logger_utils import LoggerUtils
 import pandas as pd
@@ -30,8 +31,8 @@ class MLPipeline:
             y = df['Classification']
             le = LabelEncoder()
             y = le.fit_transform(y)
-            scaler = StandardScaler()
-            X = scaler.fit_transform(X)
+            kb = KBinsDiscretizer(n_bins=2, encode='ordinal', strategy='quantile')
+            X = kb.fit_transform(X)
             return X, y
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset1_breast_cancer_coimbra_data_set.' % e)
@@ -41,13 +42,27 @@ class MLPipeline:
             # Load dataset
             df = pd.read_csv("/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment1/"
                              "datasets/Fertility Data Set/fertility_Diagnosis.txt", header=None)
-            # Convert non-binary features using KBinsDiscretizer with 2 bins
-            kb = KBinsDiscretizer(n_bins=2, encode='onehot-dense', strategy='uniform')
-            X = kb.fit_transform(df.iloc[:, :-1])
-            # Convert the class using LabelBinarizer
+            # Load your data into a numpy array or pandas dataframe
+            # assuming your data is stored in a numpy array called X
+            n_bins = 2
+            encode = 'ordinal'
+            strategy = 'quantile'
+            X = df.iloc[:, :-1]
+            y = df.iloc[:, -1]
+            # Identify binary features based on the number of unique values
+            bin_feats = np.where(np.apply_along_axis(lambda x: len(np.unique(x)) == 2, 0, X))[0]
+            nonbin_feats = np.setdiff1d(np.arange(X.shape[1]), bin_feats)
+
+            # Discretize the non-binary features only
+            if len(nonbin_feats) > 0:
+                kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+                X_binned_nonbin = kb.fit_transform(X.loc[:, nonbin_feats])
+                X_binned = np.concatenate((X_binned_nonbin, X.loc[:, bin_feats]), axis=1)
+            else:
+                X_binned = X
             lb = LabelBinarizer()
-            y = lb.fit_transform(df.iloc[:, -1])
-            return X, y
+            y = lb.fit_transform(y)
+            return X_binned, y
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset2_fertility.' % e)
 
@@ -58,23 +73,28 @@ class MLPipeline:
                              'assignment1/datasets/Heart failure clinical records Data Set/'
                              'heart_failure_clinical_records_dataset.csv')
             # Separate the target variable from the input features
-            X = df.drop('DEATH_EVENT', axis=1)
-            y = df['DEATH_EVENT']
-            # Convert non-binary features to binary using LabelBinarizer and OneHotEncoder
-            binarizer = LabelBinarizer()
-            onehot = OneHotEncoder()
-            X['sex'] = binarizer.fit_transform(X['sex'])
-            X['smoking'] = binarizer.fit_transform(X['smoking'])
-            X['anaemia'] = binarizer.fit_transform(X['anaemia'])
-            X['diabetes'] = binarizer.fit_transform(X['diabetes'])
-            X['high_blood_pressure'] = binarizer.fit_transform(X['high_blood_pressure'])
-            # One-hot encode the age, ejection_fraction, and serum_creatinine columns
-            X_encoded = onehot.fit_transform(X[['age', 'ejection_fraction', 'serum_creatinine']]).toarray()
-            X.drop(['age', 'ejection_fraction', 'serum_creatinine'], axis=1, inplace=True)
-            X = pd.concat([X.reset_index(drop=True), pd.DataFrame(X_encoded)], axis=1)
-            # Convert the target variable to binary
-            y = binarizer.fit_transform(y)
-            return X, y
+            # Load your data into a numpy array or pandas dataframe
+            # assuming your data is stored in a numpy array called X
+            n_bins = 2
+            encode = 'ordinal'
+            strategy = 'quantile'
+            X = df.iloc[:, :-1]
+            y = df.iloc[:, -1]
+            # Identify binary features based on the number of unique values
+            bin_feats = np.where(np.apply_along_axis(lambda x: len(np.unique(x)) == 2, 0, X))[0]
+            bin_feats = [X.columns[i] for i in bin_feats]
+            nonbin_feats = [col for col in X.columns if col not in bin_feats]
+
+            # Discretize the non-binary features only
+            if len(nonbin_feats) > 0:
+                kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+                X_binned_nonbin = kb.fit_transform(X[nonbin_feats])
+                X_binned = np.concatenate((X_binned_nonbin, X[bin_feats]), axis=1)
+            else:
+                X_binned = X
+            lb = LabelBinarizer()
+            y = lb.fit_transform(y)
+            return X_binned, y
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset3_heart_failure_clinical_records.' % e)
 
