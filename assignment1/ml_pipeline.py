@@ -4,7 +4,7 @@ import datetime
 from bagging_id3 import MyBaggingID3
 from logger_utils import LoggerUtils
 import pandas as pd
-from sklearn.model_selection import StratifiedKFold, cross_validate
+from sklearn.model_selection import StratifiedKFold, RepeatedStratifiedKFold, cross_validate
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.preprocessing import LabelBinarizer, KBinsDiscretizer
@@ -150,7 +150,8 @@ class MLPipeline:
                 'roc_auc_score': 'roc_auc'
             }
             # Define the cross-validation procedure
-            cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+            # cv = StratifiedKFold(n_splits=5, shuffle=True, n_repeats=2, random_state=42)
+            cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
             # Evaluate the models
             models = {'MyBaggingID3': my_bagging_id3, 'DecisionTreeClassifier': dtc, 'BaggingClassifier': bc}
             wandb.init(project="Assigment1", name=f"RUN_{datetime.datetime.now()}")
