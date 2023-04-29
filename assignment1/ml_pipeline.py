@@ -161,11 +161,9 @@ class MLPipeline:
             cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
             # Evaluate the models
             models = {'MyBaggingID3': my_bagging_id3, 'DecisionTreeClassifier': dtc, 'BaggingClassifier': bc}
+            wandb.init(project="Assigment1", name=f"RUN_{datetime.datetime.now()}")
             for name, model in models.items():
                 cv_results = cross_validate(model, X, y, cv=cv, scoring=scoring, return_train_score=False)
-                model_config = model.get_params()
-                wandb.init(project="Assigment1", name=f"{model.__class__.__name__}_{ds_name}_{datetime.datetime.now()}",
-                           config=model_config)
                 wandb.log({metric: cv_results['test_%s' % metric].mean() for metric in scoring})
         except Exception as e:
             self.logger.error('Exception %s occurred during evaluate_model.' % e)
