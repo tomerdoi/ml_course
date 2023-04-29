@@ -24,8 +24,7 @@ class MLPipeline:
     def preprocess_dataset1_breast_cancer_coimbra_data_set(self):
         try:
             # Load the dataset
-            df = pd.read_csv('/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment1/'
-                             'datasets/Breast Cancer Coimbra Data Set/dataR2.csv')
+            df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/00451/dataR2.csv')
             # Preprocess the data
             X = df.drop('Classification', axis=1)
             y = df['Classification']
@@ -40,8 +39,8 @@ class MLPipeline:
     def preprocess_dataset2_fertility(self):
         try:
             # Load dataset
-            df = pd.read_csv("/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment1/"
-                             "datasets/Fertility Data Set/fertility_Diagnosis.txt", header=None)
+            df = pd.read_csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00244/fertility_Diagnosis.txt",
+                             header=None)
             n_bins = 2
             encode = 'ordinal'
             strategy = 'quantile'
@@ -67,8 +66,7 @@ class MLPipeline:
     def preprocess_dataset3_heart_failure_clinical_records(self):
         try:
             # Load dataset
-            df = pd.read_csv('/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/'
-                             'assignment1/datasets/Heart failure clinical records Data Set/'
+            df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/00519/'
                              'heart_failure_clinical_records_dataset.csv')
             n_bins = 2
             encode = 'ordinal'
@@ -95,8 +93,8 @@ class MLPipeline:
 
     def preprocess_dataset4_ionosphere(self):
         try:
-            df = pd.read_csv('/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment1/'
-                             'datasets/Ionosphere Data Set/ionosphere.data', header=None)
+            df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/ionosphere/ionosphere.data',
+                             header=None)
             n_bins = 2
             encode = 'ordinal'
             strategy = 'quantile'
@@ -121,8 +119,11 @@ class MLPipeline:
 
     def preprocess_dataset5_spectf(self):
         try:
-            df = pd.read_csv('/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment1/'
-                             'datasets/SPECTF Heart Data Set/data.csv', header=None)
+            df_train = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/spect/SPECT.train',
+                                   header=None)
+            df_test = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/spect/SPECT.test',
+                                  header=None)
+            df = pd.concat([df_train, df_test])
             n_bins = 2
             encode = 'ordinal'
             strategy = 'quantile'
@@ -136,12 +137,16 @@ class MLPipeline:
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset5_spectf.' % e)
 
-    def evaluate_model(self, X, y):
+    def evaluate_model(self, X, y, n_estimators=250, max_samples=1.0, max_features=0, max_depth=100):
         try:
             # Define the models
-            my_bagging_id3 = MyBaggingID3(n_estimators=10, max_samples=0.8, max_features=0.8, max_depth=20)
+            if not max_features:
+                max_features = int(np.sqrt(X.shape[1]))
+            my_bagging_id3 = MyBaggingID3(n_estimators=n_estimators, max_samples=max_samples, max_features=max_features,
+                                          max_depth=max_depth)
             dtc = DecisionTreeClassifier()
-            bc = BaggingClassifier(base_estimator=dtc, n_estimators=10)
+            bc = BaggingClassifier(base_estimator=dtc, n_estimators=n_estimators, max_samples=max_samples,
+                                   max_features=max_features)
             # Define the evaluation metrics
             scoring = {
                 'accuracy': 'accuracy',
@@ -164,14 +169,19 @@ class MLPipeline:
 
 if __name__ == '__main__':
     ml_pipeline = MLPipeline()
+    ml_pipeline.logger.info('Running dataset1 pipeline.')
     X, y = ml_pipeline.preprocess_dataset1_breast_cancer_coimbra_data_set()
     ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.logger.info('Running dataset2 pipeline.')
     X, y = ml_pipeline.preprocess_dataset2_fertility()
     ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.logger.info('Running dataset3 pipeline.')
     X, y = ml_pipeline.preprocess_dataset3_heart_failure_clinical_records()
     ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.logger.info('Running dataset4 pipeline.')
     X, y = ml_pipeline.preprocess_dataset4_ionosphere()
     ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.logger.info('Running dataset5 pipeline.')
     X, y = ml_pipeline.preprocess_dataset5_spectf()
     ml_pipeline.evaluate_model(X, y)
     pass
