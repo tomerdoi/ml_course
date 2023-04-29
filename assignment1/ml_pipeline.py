@@ -4,12 +4,11 @@ import datetime
 from bagging_id3 import MyBaggingID3
 from logger_utils import LoggerUtils
 import pandas as pd
-from sklearn.model_selection import RepeatedStratifiedKFold, cross_validate
+from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
-from sklearn.preprocessing import LabelBinarizer, KBinsDiscretizer, OneHotEncoder
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import LabelBinarizer, KBinsDiscretizer
+from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 import wandb
 
@@ -125,15 +124,8 @@ class MLPipeline:
             df_test = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/spect/SPECT.test',
                                   header=None)
             df = pd.concat([df_train, df_test])
-            n_bins = 2
-            encode = 'ordinal'
-            strategy = 'quantile'
-            X = df.iloc[:, 1:]
+            X = df.iloc[:, 1:].values
             y = df.iloc[:, 0]
-            kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
-            X = kb.fit_transform(X)
-            lb = LabelBinarizer()
-            y = lb.fit_transform(y)
             return X, y
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset5_spectf.' % e)
@@ -158,7 +150,7 @@ class MLPipeline:
                 'roc_auc_score': 'roc_auc'
             }
             # Define the cross-validation procedure
-            cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
+            cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
             # Evaluate the models
             models = {'MyBaggingID3': my_bagging_id3, 'DecisionTreeClassifier': dtc, 'BaggingClassifier': bc}
             wandb.init(project="Assigment1", name=f"RUN_{datetime.datetime.now()}")
