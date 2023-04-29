@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import datetime
 from bagging_id3 import MyBaggingID3
 from logger_utils import LoggerUtils
 import pandas as pd
@@ -137,11 +138,12 @@ class MLPipeline:
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset5_spectf.' % e)
 
-    def evaluate_model(self, X, y, n_estimators=250, max_samples=1.0, max_features=0, max_depth=100):
+    def evaluate_model(self, X, y, n_estimators=250, max_samples=1.0, max_features=0, max_depth=100, ds_name=''):
         try:
             # Define the models
             if not max_features:
                 max_features = int(np.sqrt(X.shape[1]))
+                max_features = 1.0 * max_features / X.shape[1]
             my_bagging_id3 = MyBaggingID3(n_estimators=n_estimators, max_samples=max_samples, max_features=max_features,
                                           max_depth=max_depth)
             dtc = DecisionTreeClassifier()
@@ -159,9 +161,11 @@ class MLPipeline:
             cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=42)
             # Evaluate the models
             models = {'MyBaggingID3': my_bagging_id3, 'DecisionTreeClassifier': dtc, 'BaggingClassifier': bc}
-            wandb.init(project="my-project", name='Assignment1')
             for name, model in models.items():
                 cv_results = cross_validate(model, X, y, cv=cv, scoring=scoring, return_train_score=False)
+                model_config = model.get_params()
+                wandb.init(project="Assigment1", name=f"{model.__class__.__name__}_{ds_name}_{datetime.datetime.now()}",
+                           config=model_config)
                 wandb.log({metric: cv_results['test_%s' % metric].mean() for metric in scoring})
         except Exception as e:
             self.logger.error('Exception %s occurred during evaluate_model.' % e)
@@ -171,18 +175,18 @@ if __name__ == '__main__':
     ml_pipeline = MLPipeline()
     ml_pipeline.logger.info('Running dataset1 pipeline.')
     X, y = ml_pipeline.preprocess_dataset1_breast_cancer_coimbra_data_set()
-    ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.evaluate_model(X, y, ds_name='breast_cancer_coimbra')
     ml_pipeline.logger.info('Running dataset2 pipeline.')
     X, y = ml_pipeline.preprocess_dataset2_fertility()
-    ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.evaluate_model(X, y, ds_name='fertility')
     ml_pipeline.logger.info('Running dataset3 pipeline.')
     X, y = ml_pipeline.preprocess_dataset3_heart_failure_clinical_records()
-    ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.evaluate_model(X, y, ds_name='heart_failure_clinical_records')
     ml_pipeline.logger.info('Running dataset4 pipeline.')
     X, y = ml_pipeline.preprocess_dataset4_ionosphere()
-    ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.evaluate_model(X, y, ds_name='ionosphere')
     ml_pipeline.logger.info('Running dataset5 pipeline.')
     X, y = ml_pipeline.preprocess_dataset5_spectf()
-    ml_pipeline.evaluate_model(X, y)
+    ml_pipeline.evaluate_model(X, y, ds_name='spectf')
     pass
 
