@@ -43,7 +43,7 @@ class MLPipeline:
                              header=None)
             n_bins = 2
             encode = 'ordinal'
-            strategy = 'quantile'
+            strategy = 'kmeans'
             X = df.iloc[:, :-1]
             y = df.iloc[:, -1]
             # Identify binary features based on the number of unique values
@@ -70,7 +70,7 @@ class MLPipeline:
                              'heart_failure_clinical_records_dataset.csv')
             n_bins = 2
             encode = 'ordinal'
-            strategy = 'quantile'
+            strategy = 'kmeans'
             X = df.iloc[:, :-1]
             y = df.iloc[:, -1]
             # Identify binary features based on the number of unique values
@@ -130,6 +130,98 @@ class MLPipeline:
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_dataset5_spectf.' % e)
 
+    def preprocess_dataset6_haberman_survival(self):
+        try:
+            df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/haberman/haberman.data',
+                             header=None)
+            X = df.iloc[:, :-1]
+            y = df.iloc[:, -1]
+            # Identify binary features based on the number of unique values
+            bin_feats = np.where(np.apply_along_axis(lambda x: len(np.unique(x)) == 2, 0, X))[0]
+            nonbin_feats = np.setdiff1d(np.arange(X.shape[1]), bin_feats)
+            n_bins = 2
+            encode = 'ordinal'
+            strategy = 'uniform'
+            # Discretize the non-binary features only
+            if len(nonbin_feats) > 0:
+                kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+                X_binned_nonbin = kb.fit_transform(X.loc[:, nonbin_feats])
+                X_binned = np.concatenate((X_binned_nonbin, X.loc[:, bin_feats]), axis=1)
+            else:
+                X_binned = X
+            lb = LabelBinarizer()
+            y = lb.fit_transform(y)
+            return X_binned, y
+        except Exception as e:
+            self.logger.error('Exception %s occurred during preprocess_dataset6_haberman_survival.' % e)
+
+    def preprocess_dataset7_breast_cancer_wisconsin(self):
+        try:
+            df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/'
+                             'wdbc.data', header=None)
+            X = df.iloc[:, 2:]
+            y = df.iloc[:, 1]
+            n_bins = 2
+            encode = 'ordinal'
+            strategy = 'uniform'
+            # Discretize the non-binary features only
+            kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+            X_binned = kb.fit_transform(X)
+            lb = LabelBinarizer()
+            y = lb.fit_transform(y)
+            return X_binned, y
+        except Exception as e:
+            self.logger.error('Exception %s occurred during preprocess_dataset7_breast_cancer_wisconsin.' % e)
+
+    def preprocess_dataset8_ilpd(self):
+        try:
+            lb = LabelBinarizer()
+            df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/00225/'
+                             'Indian%20Liver%20Patient%20Dataset%20(ILPD).csv',
+                             names=["Age", "Gender", "TB", "DB", "Alkphos", "SGPT", "SGOT", "TP", "ALB", "A/G",
+                                    "Selector"])
+            df = df.dropna()
+            df['Gender'] = lb.fit_transform(df['Gender'])
+            X = df.iloc[:, :-1]
+            y = df.iloc[:, -1]
+            n_bins = 2
+            encode = 'ordinal'
+            strategy = 'uniform'
+            # Discretize the non-binary features only
+            kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+            X_binned = kb.fit_transform(X)
+            y = lb.fit_transform(y)
+            return X_binned, y
+        except Exception as e:
+            self.logger.error('Exception %s occurred during preprocess_dataset8_ilpd.' % e)
+
+    def preprocess_dataset9_algerian_forest_fires(self):
+        try:
+            lb = LabelEncoder()
+            df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/00547/'
+                             'Algerian_forest_fires_dataset_UPDATE.csv', skiprows=1, nrows=122)
+
+            def convert_class_value(value):
+                if 'not' in value:
+                    return 0
+                else:
+                    return 1
+            # apply the function to the class column and assign the result to a new column 'class_num'
+            df['Classes  '] = df['Classes  '].apply(convert_class_value)
+            df = df.dropna()
+            X = df.iloc[:, :-1]
+            y = df.iloc[:, -1]
+            n_bins = 2
+            encode = 'ordinal'
+            strategy = 'uniform'
+            # Discretize the non-binary features only
+            kb = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+            X_binned = kb.fit_transform(X)
+            y = lb.fit_transform(y)
+            return X_binned, y
+        except Exception as e:
+            self.logger.error('Exception %s occurred during preprocess_dataset9_algerian_forest_fires.' % e)
+
     def evaluate_model(self, X, y, n_estimators=250, max_samples=1.0, max_features=0, max_depth=100, ds_name=''):
         try:
             # Define the models
@@ -167,17 +259,27 @@ if __name__ == '__main__':
     ml_pipeline.logger.info('Running dataset1 pipeline.')
     X, y = ml_pipeline.preprocess_dataset1_breast_cancer_coimbra_data_set()
     ml_pipeline.evaluate_model(X, y, ds_name='breast_cancer_coimbra')
-    ml_pipeline.logger.info('Running dataset2 pipeline.')
-    X, y = ml_pipeline.preprocess_dataset2_fertility()
-    ml_pipeline.evaluate_model(X, y, ds_name='fertility')
-    ml_pipeline.logger.info('Running dataset3 pipeline.')
-    X, y = ml_pipeline.preprocess_dataset3_heart_failure_clinical_records()
-    ml_pipeline.evaluate_model(X, y, ds_name='heart_failure_clinical_records')
+    # ml_pipeline.logger.info('Running dataset2 pipeline.')
+    # X, y = ml_pipeline.preprocess_dataset2_fertility()
+    # ml_pipeline.evaluate_model(X, y, ds_name='fertility')
+    # ml_pipeline.logger.info('Running dataset3 pipeline.')
+    # X, y = ml_pipeline.preprocess_dataset3_heart_failure_clinical_records()
+    # ml_pipeline.evaluate_model(X, y, ds_name='heart_failure_clinical_records')
     ml_pipeline.logger.info('Running dataset4 pipeline.')
     X, y = ml_pipeline.preprocess_dataset4_ionosphere()
     ml_pipeline.evaluate_model(X, y, ds_name='ionosphere')
     ml_pipeline.logger.info('Running dataset5 pipeline.')
     X, y = ml_pipeline.preprocess_dataset5_spectf()
     ml_pipeline.evaluate_model(X, y, ds_name='spectf')
+    # X, y = ml_pipeline.preprocess_dataset6_haberman_survival()
+    # ml_pipeline.evaluate_model(X, y, ds_name='haberman_survival')
+    ml_pipeline.logger.info('Running dataset7 pipeline.')
+    X, y = ml_pipeline.preprocess_dataset7_breast_cancer_wisconsin()
+    ml_pipeline.evaluate_model(X, y, ds_name='breast_cancer_wisconsin_diagnostic_data_set')
+    # X, y = ml_pipeline.preprocess_dataset8_ilpd()
+    # ml_pipeline.evaluate_model(X, y, ds_name='ilpd_data_set')
+    ml_pipeline.logger.info('Running dataset9 pipeline.')
+    X, y = ml_pipeline.preprocess_dataset9_algerian_forest_fires()
+    ml_pipeline.evaluate_model(X, y, ds_name='algerian_forest_fires')
     pass
 
