@@ -24,8 +24,8 @@ class AutoSklearnPipeline:
             X_imputed = imp.fit_transform(X)
             X_test_imputed = imp.fit_transform(X_test)
             # Define the AutoML classifier with default settings
-            clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=300, per_run_time_limit=100,
-                                                                   seed=42)
+            clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=3600 * 4,
+                                                                   per_run_time_limit=300, seed=42)
             # Fit the AutoML classifier to the data
             clf.fit(X_imputed, y)
             # Print the selected model and its score on the holdout set
