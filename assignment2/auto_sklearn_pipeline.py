@@ -23,23 +23,24 @@ class AutoSklearnPipeline:
                     X = train_set.iloc[:, :-1]
                     y = train_set.iloc[:, -1]
                     # Impute the missing and NaN values using the median imputation
-                    imp = SimpleImputer(strategy=strategy)
-                    X_imputed = imp.fit_transform(X)
-                    X_test_imputed = imp.fit_transform(X_test)
+                    # imp = SimpleImputer(strategy=strategy)
+                    # X_imputed = imp.fit_transform(X)
+                    # X_test_imputed = imp.fit_transform(X_test)
                     # Define the AutoML classifier with default settings
-                    clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=600,
-                                                                           per_run_time_limit=60, seed=42,
+                    clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=3600 * 6,
+                                                                           per_run_time_limit=300, seed=42,
                                                                            include={
-                                                                               'classifier': ["extra_trees"]
+                                                                               'classifier': ["random_forest",
+                                                                                              "extra_trees"]
                                                                            },
                                                                            metric=autosklearn.metrics.roc_auc
                                                                            )
                     # Fit the AutoML classifier to the data
-                    clf.fit(X_imputed, y)
+                    clf.fit(X, y)
                     # Print the selected model and its score on the holdout set
                     print('Selected model %s:' % str(clf.show_models()))
-                    print('Score: %s' % str(clf.score(X_imputed, y)))
-                    probs = clf.predict_proba(X_test_imputed)
+                    print('Score: %s' % str(clf.score(X, y)))
+                    probs = clf.predict_proba(X_test)
                     with open('sub_sklearn_%s.csv' % strategy, 'w') as fp:
                         fp.write('Id,Predicted\n')
                         for i in range(len(probs)):
