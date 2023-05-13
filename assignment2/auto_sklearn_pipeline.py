@@ -3,6 +3,7 @@ import autosklearn.classification
 import pandas as pd
 import autosklearn.classification
 from sklearn.impute import SimpleImputer
+from autosklearn import metrics
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -14,7 +15,7 @@ class AutoSklearnPipeline:
 
     def run(self):
         try:
-            for strategy in ['mean', 'median', 'most_frequent', 'constant']:
+            for strategy in ['mean']:  # , 'median', 'most_frequent', 'constant']:
                 try:
                     train_set = pd.read_csv('train.csv')
                     test_set = pd.read_csv('validation_and_test.csv')
@@ -26,8 +27,13 @@ class AutoSklearnPipeline:
                     X_imputed = imp.fit_transform(X)
                     X_test_imputed = imp.fit_transform(X_test)
                     # Define the AutoML classifier with default settings
-                    clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=1800,
-                                                                           per_run_time_limit=300, seed=42)
+                    clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=600,
+                                                                           per_run_time_limit=60, seed=42,
+                                                                           include={
+                                                                               'classifier': ["extra_trees"]
+                                                                           },
+                                                                           metric=autosklearn.metrics.roc_auc
+                                                                           )
                     # Fit the AutoML classifier to the data
                     clf.fit(X_imputed, y)
                     # Print the selected model and its score on the holdout set
