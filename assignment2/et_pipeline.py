@@ -25,7 +25,7 @@ class ETPipeline:
                     X_imputed = imp.fit_transform(X)
                     X_test_imputed = imp.fit_transform(X_test)
                     clf = ExtraTreesClassifier(max_features='sqrt', max_leaf_nodes=21,
-                                               n_estimators=500, n_jobs=-1, random_state=12032022, max_depth=600,
+                                               n_estimators=1000, n_jobs=-1, random_state=12032022, max_depth=1000,
                                                criterion="gini")
                     clf.fit(X_imputed, y)
                     pred_probs = clf.predict_proba(X_test_imputed)
