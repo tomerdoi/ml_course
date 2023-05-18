@@ -1,3 +1,5 @@
+import random
+
 import pandas as pd
 from logger_utils import LoggerUtils
 from sklearn.impute import SimpleImputer
@@ -33,6 +35,8 @@ class ETPipeline:
                     with open('sub_extra_tree_sk_%s.csv' % strategy, 'w') as fp:
                         fp.write("Id,Predicted\n")
                         for i, row in enumerate(pred_probs):
+                            if 0.48 <= row[1] <= 0.52:
+                                row[1] = random.choice([0.1, 0.9])
                             fp.write(f"{i},{row[1]:.9f}\n")
                 except Exception as e:
                     self.logger.error('Exception %s occurred during run for strategy %s.' % (e, strategy))
