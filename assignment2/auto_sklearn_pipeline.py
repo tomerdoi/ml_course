@@ -15,10 +15,10 @@ class AutoSklearnPipeline:
 
     def run(self):
         try:
-            for strategy in ['mean']:  # , 'median', 'most_frequent', 'constant']:
+            for strategy in ['most_frequent']:  # , 'median', 'most_frequent', 'constant']:
                 try:
                     X, y, X_test = self.preprocessor.preprocess_data(strategy='most_frequent', smote=True)
-                    clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=1200,
+                    clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=3600 * 2,
                                                                            per_run_time_limit=300, seed=42,
                                                                            include={
                                                                                'classifier': ["random_forest",
