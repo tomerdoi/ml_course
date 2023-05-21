@@ -1,6 +1,7 @@
 from logger_utils import LoggerUtils
 from sklearn.ensemble import ExtraTreesClassifier
 from preprocessor import PreProcessor
+from sklearn.model_selection import cross_val_score
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -15,11 +16,19 @@ class ETPipeline:
         try:
             for strategy in ['most_frequent']:  # ['mean', 'median', 'most_frequent', 'constant']:
                 try:
-                    X_imputed, y, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy, smote=True)
-                    clf = ExtraTreesClassifier(max_features='sqrt', max_leaf_nodes=31,
-                                               n_estimators=1000, n_jobs=-1, random_state=12032022, max_depth=1000,
+                    X_imputed, y, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy, smote=True,
+                                                                                     iterations=500)
+                    clf = ExtraTreesClassifier(max_features='sqrt', max_leaf_nodes=40,
+                                               n_estimators=2000, n_jobs=-1, random_state=12032022, max_depth=2000,
                                                criterion="gini")
                     clf.fit(X_imputed, y)
+                    # Perform cross-validation
+                    cv_scores = cross_val_score(clf, X_imputed, y, cv=5)  # Change the cv value as desired
+                    # Print the cross-validation scores
+                    self.logger.info("Cross-validation scores: %s" % str(cv_scores))
+                    print("Mean cross-validation score: %s" % str(cv_scores.mean()))
+                    print("Standard deviation of cross-validation scores: %s" % str(cv_scores.std()))
+
                     pred_probs = clf.predict_proba(X_test_imputed)
                     # Save the predictions to a CSV file
                     with open('sub_extra_tree_sk_%s.csv' % strategy, 'w') as fp:

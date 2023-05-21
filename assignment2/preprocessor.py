@@ -13,12 +13,12 @@ class PreProcessor:
         self.logger_util = LoggerUtils()
         self.logger = self.logger_util.init_logger(log_file_name='ass2.log')
 
-    def smote_train_set(self, X, y):
+    def smote_train_set(self, X, y, iterations=100):
         try:
             # {'not majority', 'auto', 'not minority', 'minority', 'all'}
             smote = SMOTE(random_state=42)
             # Generate synthetic samples
-            for i in range(100):
+            for i in range(iterations):
                 # Randomly select a subset of rows from X and y
                 random_indices = np.random.choice(len(X), size=random.randint(int(0.5 * len(X)), len(X) - 1),
                                                   replace=False)
@@ -34,7 +34,7 @@ class PreProcessor:
         except Exception as e:
             self.logger.error('Exception %s occurred during smote_train_set.' % e)
 
-    def preprocess_data(self, strategy='most_frequent', smote=False):
+    def preprocess_data(self, strategy='most_frequent', smote=False, iterations=100):
         try:
             train_set = pd.read_csv('train.csv')
             # train_set = pd.concat([train_set] * 20, ignore_index=True)
@@ -50,7 +50,7 @@ class PreProcessor:
                 X_imputed = X
                 X_test_imputed = X_test
             if smote:
-                X_imputed, y = self.smote_train_set(X_imputed, y)
+                X_imputed, y = self.smote_train_set(X_imputed, y, iterations)
             return X_imputed, y, X_test_imputed
         except Exception as e:
             self.logger.error('Exception %s occurred during preprocess_data.' % e)
