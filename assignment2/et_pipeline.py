@@ -1,3 +1,6 @@
+import os.path
+
+import numpy as np
 from logger_utils import LoggerUtils
 from sklearn.ensemble import ExtraTreesClassifier
 from preprocessor import PreProcessor
@@ -16,18 +19,29 @@ class ETPipeline:
         try:
             for strategy in ['most_frequent']:  # ['mean', 'median', 'most_frequent', 'constant']:
                 try:
-                    X_imputed, y, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy, smote=True,
-                                                                                     iterations=500)
-                    clf = ExtraTreesClassifier(max_features='sqrt', max_leaf_nodes=40,
+                    self.logger.info('Preprocessing data.')
+                    if os.path.exists('X_imputed.npy') and os.path.exists('y.npy'):
+                        X_imputed = np.load('X_imputed.npy')
+                        y = np.load('y.npy')
+                        _, _, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy)
+                    else:
+                        X_imputed, y, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy, smote=True,
+                                                                                         iterations=400)
+                        np.save('X_imputed.npy', X_imputed)
+                        np.save('y.npy', y)
+                    self.logger.info('X len is: %s' % str(X_imputed.shape))
+                    clf = ExtraTreesClassifier(max_features='sqrt', max_leaf_nodes=30,
                                                n_estimators=2000, n_jobs=-1, random_state=12032022, max_depth=2000,
                                                criterion="gini")
+                    self.logger.info('Fitting model.')
                     clf.fit(X_imputed, y)
-                    # Perform cross-validation
-                    cv_scores = cross_val_score(clf, X_imputed, y, cv=5)  # Change the cv value as desired
-                    # Print the cross-validation scores
-                    self.logger.info("Cross-validation scores: %s" % str(cv_scores))
-                    print("Mean cross-validation score: %s" % str(cv_scores.mean()))
-                    print("Standard deviation of cross-validation scores: %s" % str(cv_scores.std()))
+                    # # Perform cross-validation
+                    # self.logger.info('Validating model.')
+                    # cv_scores = cross_val_score(clf, X_imputed, y, cv=5)  # Change the cv value as desired
+                    # # Print the cross-validation scores
+                    # self.logger.info("Cross-validation scores: %s" % str(cv_scores))
+                    # print("Mean cross-validation score: %s" % str(cv_scores.mean()))
+                    # print("Standard deviation of cross-validation scores: %s" % str(cv_scores.std()))
 
                     pred_probs = clf.predict_proba(X_test_imputed)
                     # Save the predictions to a CSV file
