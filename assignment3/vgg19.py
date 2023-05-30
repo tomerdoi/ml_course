@@ -1,6 +1,3 @@
-from vgg_pytorch import VGG
-model = VGG.from_pretrained('vgg19', num_classes=10)
-
 import torch
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
