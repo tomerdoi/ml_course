@@ -10,8 +10,8 @@ from vgg_pytorch import VGG
 
 num_epochs = 1000
 # Set the path to the train and test folders
-train_folder = 'path/to/train/folder'
-test_folder = 'path/to/test/folder'
+train_folder = '/Users/tomerdoitshman/Desktop/other/D_non_shared'
+test_folder = '/Users/tomerdoitshman/Desktop/other/D_non_shared'
 
 # Define the transformation to apply to the images
 transform = transforms.Compose([

@@ -43,7 +43,7 @@ class FlowerDataset(Dataset):
 
 
 # Load and transform the dataset
-root_dir = '/path/to/your/extracted/flowers/dataset'  # Replace with the path to the extracted dataset
+root_dir = '/Users/tomerdoitshman/Desktop/other/D_non_shared'  # Replace with the path to the extracted dataset
 transform = transforms.Compose([
     transforms.Resize((640, 640)),  # Resize the images to the desired input size
     transforms.ToTensor(),
