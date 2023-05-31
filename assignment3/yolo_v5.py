@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import ImageFolder
+from sklearn.metrics import accuracy_score, precision_score
 
 
 # Define the flower dataset class
@@ -27,7 +28,7 @@ transform = transforms.Compose([
 dataset = FlowerDataset(root_dir, transform=transform)
 
 # Create a dataloader
-dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=100, shuffle=True)
 
 # Load the pre-trained ResNet model
 model = torch.hub.load('pytorch/vision:v0.9.0', 'resnet18', pretrained=True)
@@ -46,10 +47,13 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 
 # Training loop
-num_epochs = 10
+num_epochs = 1
 for epoch in range(num_epochs):
     running_loss = 0.0
+    batch_idx = 0
     for images, labels in dataloader:
+        print('Running on batch %d' % batch_idx)
+        batch_idx += 1
         images = images.to(device)
         labels = labels.to(device)
         optimizer.zero_grad()
@@ -58,5 +62,17 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
+        if batch_idx == 1:  # Calculate accuracy and precision after the first batch
+            _, predicted = torch.max(outputs, 1)
+            predicted = predicted.cpu().numpy()
+            labels = labels.cpu().numpy()
+
+            accuracy = accuracy_score(labels, predicted)
+            precision = precision_score(labels, predicted, average='weighted')
+
+            print('Accuracy:', accuracy)
+            print('Precision:', precision)
+        break
+
     epoch_loss = running_loss / len(dataloader)
     print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss:.4f}")
