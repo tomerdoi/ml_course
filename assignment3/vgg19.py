@@ -41,7 +41,6 @@ for epoch in range(10):  # Adjust the number of epochs as needed
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
-
     # Evaluation on test set
     model.eval()
     test_loss = 0
@@ -52,7 +51,6 @@ for epoch in range(10):  # Adjust the number of epochs as needed
             test_loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs, 1)
             correct += (predicted == labels).sum().item()
-
     test_loss /= len(test_loader.dataset)
     accuracy = 100.0 * correct / len(test_loader.dataset)
     print(f"Epoch: {epoch+1}/{num_epochs}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%")

@@ -52,15 +52,11 @@ for epoch in range(num_epochs):
     for images, labels in dataloader:
         images = images.to(device)
         labels = labels.to(device)
-
         optimizer.zero_grad()
-
         outputs = model(images)
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
-
         running_loss += loss.item()
-
     epoch_loss = running_loss / len(dataloader)
     print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss:.4f}")
