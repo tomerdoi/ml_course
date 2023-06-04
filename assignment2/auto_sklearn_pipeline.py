@@ -19,7 +19,8 @@ class AutoSklearnPipeline:
                 try:
                     X, y, X_test = self.preprocessor.preprocess_data(strategy='most_frequent', smote=True)
                     clf = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=3600 * 2,
-                                                                           per_run_time_limit=300, seed=42,
+                                                                           per_run_time_limit=1800, seed=42,
+                                                                           memory_limit=10 * 1024,
                                                                            include={
                                                                                'classifier': ["random_forest",
                                                                                               "extra_trees"]

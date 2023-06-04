@@ -1,3 +1,4 @@
+import os
 import random
 from imblearn.over_sampling import SMOTE
 import pandas as pd
@@ -15,10 +16,18 @@ class PreProcessor:
 
     def smote_train_set(self, X, y, iterations=100):
         try:
+            if os.path.exists('X_imputed.npy') and os.path.exists('y.npy'):
+                X = np.load('X_imputed.npy')
+                y = np.load('y.npy')
+                return X, y
             # {'not majority', 'auto', 'not minority', 'minority', 'all'}
             smote = SMOTE(random_state=42)
             # Generate synthetic samples
             for i in range(iterations):
+                if i % 100 == 0 and i:
+                    np.save('X_imputed.npy', X)
+                    np.save('y.npy', y)
+                self.logger.info('Processing smote iteration %d, dataset size: %d.' % (i, len(X)))
                 # Randomly select a subset of rows from X and y
                 random_indices = np.random.choice(len(X), size=random.randint(int(0.5 * len(X)), len(X) - 1),
                                                   replace=False)

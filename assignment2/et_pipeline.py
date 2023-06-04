@@ -26,7 +26,7 @@ class ETPipeline:
                         _, _, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy)
                     else:
                         X_imputed, y, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy, smote=True,
-                                                                                         iterations=400)
+                                                                                         iterations=1000)
                         np.save('X_imputed.npy', X_imputed)
                         np.save('y.npy', y)
                     self.logger.info('X len is: %s' % str(X_imputed.shape))
