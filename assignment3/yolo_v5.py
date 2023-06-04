@@ -1,8 +1,10 @@
+import os
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import ImageFolder
+import scipy.io as sio
 from sklearn.metrics import accuracy_score, precision_score
 
 
@@ -10,16 +12,25 @@ from sklearn.metrics import accuracy_score, precision_score
 class FlowerDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.dataset = ImageFolder(root_dir, transform=transform)
+        self.labels = self.load_labels(root_dir)
+
+    def load_labels(self, root_dir):
+        labels_file = os.path.join(root_dir, 'imagelabels.mat')
+        labels = sio.loadmat(labels_file)['labels'][0]
+        return labels - 1  # Adjust labels to be zero-indexed
 
     def __len__(self):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        return self.dataset[idx]
+        image, _ = self.dataset[idx]  # Discard the original label
+        label = self.labels[idx]
+        return image, label
 
 
 # Load and transform the dataset
-root_dir = '/Users/tomerdoitshman/Desktop/other/D_non_shared'  # Replace with the path to the extracted dataset
+root_dir = '/Users/tomerdoitshman/Desktop/other/D_non_shared/ass3_dataset'  # Replace with the
+# path to the extracted dataset
 transform = transforms.Compose([
     transforms.Resize((224, 224)),  # Resize the images to the desired input size for the ResNet model
     transforms.ToTensor(),

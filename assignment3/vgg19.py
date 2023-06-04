@@ -1,14 +1,37 @@
+import os
 import torch
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from vgg_pytorch import VGG
+import scipy.io as sio
 
 
 num_epochs = 1000
 # Set the path to the train and test folders
-train_folder = '/Users/tomerdoitshman/Desktop/other/D_non_shared'
-test_folder = '/Users/tomerdoitshman/Desktop/other/D_non_shared'
+train_folder = '/Users/tomerdoitshman/Desktop/other/D_non_shared/ass3_dataset'
+test_folder = '/Users/tomerdoitshman/Desktop/other/D_non_shared/ass3_dataset'
+
+
+# Define the flower dataset class
+class FlowerDataset(Dataset):
+    def __init__(self, root_dir, transform=None):
+        self.dataset = ImageFolder(root_dir, transform=transform)
+        self.labels = self.load_labels(root_dir)
+
+    def load_labels(self, root_dir):
+        labels_file = os.path.join(root_dir, 'imagelabels.mat')
+        labels = sio.loadmat(labels_file)['labels'][0]
+        return labels - 1  # Adjust labels to be zero-indexed
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        image, _ = self.dataset[idx]  # Discard the original label
+        label = self.labels[idx]
+        return image, label
+
 
 # Define the transformation to apply to the images
 transform = transforms.Compose([
@@ -16,6 +39,11 @@ transform = transforms.Compose([
     transforms.ToTensor(),           # Convert images to tensors
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Normalize the image tensors
 ])
+
+# Create a custom FlowerDataset with the labels
+dataset = FlowerDataset(train_folder, transform=transform)
+# Create a dataloader
+dataloader = DataLoader(dataset, batch_size=100, shuffle=True)
 
 # Create train and test datasets
 train_dataset = ImageFolder(train_folder, transform=transform)
@@ -35,7 +63,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 # Training loop
 for epoch in range(10):  # Adjust the number of epochs as needed
     model.train()
-    for images, labels in train_loader:
+    for images, labels in dataloader:
         optimizer.zero_grad()
         outputs = model(images)
         loss = criterion(outputs, labels)
