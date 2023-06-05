@@ -5,7 +5,7 @@ from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader, Dataset
 from vgg_pytorch import VGG
 import scipy.io as sio
-
+from sklearn.metrics import accuracy_score, precision_score
 
 num_epochs = 1000
 # Set the path to the train and test folders
@@ -36,7 +36,7 @@ class FlowerDataset(Dataset):
 # Define the transformation to apply to the images
 transform = transforms.Compose([
     transforms.Resize((224, 224)),  # Resize the images to VGG input size
-    transforms.ToTensor(),           # Convert images to tensors
+    transforms.ToTensor(),  # Convert images to tensors
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Normalize the image tensors
 ])
 
@@ -50,7 +50,6 @@ train_dataset = ImageFolder(train_folder, transform=transform)
 test_dataset = ImageFolder(test_folder, transform=transform)
 
 # Create train and test data loaders
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 # Load the pre-trained VGG model
@@ -61,7 +60,7 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
 # Training loop
-for epoch in range(10):  # Adjust the number of epochs as needed
+for epoch in range(num_epochs):
     model.train()
     for images, labels in dataloader:
         optimizer.zero_grad()
@@ -69,16 +68,14 @@ for epoch in range(10):  # Adjust the number of epochs as needed
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
+
+        _, predicted = torch.max(outputs, 1)
+        predicted = predicted.cpu().numpy()
+        labels = labels.cpu().numpy()
+        accuracy = accuracy_score(labels, predicted)
+        precision = precision_score(labels, predicted, average='weighted')
+        print('Accuracy:', accuracy)
+        print('Precision:', precision)
+
     # Evaluation on test set
     model.eval()
-    test_loss = 0
-    correct = 0
-    with torch.no_grad():
-        for images, labels in test_loader:
-            outputs = model(images)
-            test_loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs, 1)
-            correct += (predicted == labels).sum().item()
-    test_loss /= len(test_loader.dataset)
-    accuracy = 100.0 * correct / len(test_loader.dataset)
-    print(f"Epoch: {epoch+1}/{num_epochs}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%")

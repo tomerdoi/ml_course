@@ -73,17 +73,12 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
-        if batch_idx == 1:  # Calculate accuracy and precision after the first batch
-            _, predicted = torch.max(outputs, 1)
-            predicted = predicted.cpu().numpy()
-            labels = labels.cpu().numpy()
-
-            accuracy = accuracy_score(labels, predicted)
-            precision = precision_score(labels, predicted, average='weighted')
-
-            print('Accuracy:', accuracy)
-            print('Precision:', precision)
-        break
-
+        _, predicted = torch.max(outputs, 1)
+        predicted = predicted.cpu().numpy()
+        labels = labels.cpu().numpy()
+        accuracy = accuracy_score(labels, predicted)
+        precision = precision_score(labels, predicted, average='weighted')
+        print('Accuracy:', accuracy)
+        print('Precision:', precision)
     epoch_loss = running_loss / len(dataloader)
     print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss:.4f}")
