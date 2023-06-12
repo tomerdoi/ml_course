@@ -12,7 +12,7 @@ class YoloV5:
         self.dataloader = None
         self.model = None
         self.logger_util = LoggerUtils()
-        self.logger = self.logger_util.init_logger(log_file_name='vgg19.log')
+        self.logger = self.logger_util.init_logger(log_file_name='yolov5.log')
 
     def load_data(self):
         try:
