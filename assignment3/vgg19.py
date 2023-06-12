@@ -49,8 +49,8 @@ class VGG19:
                     labels = labels.cpu().numpy()
                     accuracy = accuracy_score(labels, predicted)
                     precision = precision_score(labels, predicted, average='weighted')
-                    self.logger.info('Accuracy:', accuracy)
-                    self.logger.info('Precision:', precision)
+                    self.logger.info('Accuracy: %0.5f' % accuracy)
+                    self.logger.info('Precision: %0.5f' % precision)
                 # Evaluation on test set
                 self.model.eval()
         except Exception as e:
