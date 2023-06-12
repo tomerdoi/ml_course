@@ -1,9 +1,10 @@
 import torch
 from vgg_pytorch import VGG
 from data_loader import FlowerDataLoader
+from logger_utils import LoggerUtils
 from sklearn.metrics import accuracy_score, precision_score
 
-num_epochs = 1000
+num_epochs = 10
 
 
 class VGG19:
@@ -12,19 +13,21 @@ class VGG19:
         self.flowers_data_loader = FlowerDataLoader(root_dir=self.train_folder, batch_size=100)
         self.dataloader = None
         self.model = None
+        self.logger_util = LoggerUtils()
+        self.logger = self.logger_util.init_logger(log_file_name='vgg19.log')
 
     def load_data(self):
         try:
             self.dataloader = self.flowers_data_loader.get_train_data_loader()
         except Exception as e:
-            print('Exception %s occurred during load_data.' % e)
+            self.logger.error('Exception %s occurred during load_data.' % e)
 
     def load_model(self):
         try:
             # Load the pre-trained VGG model
             self.model = VGG.from_pretrained('vgg19', num_classes=102)  # Update num_classes to match your dataset
         except Exception as e:
-            print('Exception %s occurred during load_model.' % e)
+            self.logger.error('Exception %s occurred during load_model.' % e)
 
     def train_model(self):
         try:
@@ -33,6 +36,7 @@ class VGG19:
             optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
             # Training loop
             for epoch in range(num_epochs):
+                self.logger.info('Running on epoch %d.' % epoch)
                 self.model.train()
                 for images, labels in self.dataloader:
                     optimizer.zero_grad()
@@ -45,12 +49,12 @@ class VGG19:
                     labels = labels.cpu().numpy()
                     accuracy = accuracy_score(labels, predicted)
                     precision = precision_score(labels, predicted, average='weighted')
-                    print('Accuracy:', accuracy)
-                    print('Precision:', precision)
+                    self.logger.info('Accuracy:', accuracy)
+                    self.logger.info('Precision:', precision)
                 # Evaluation on test set
                 self.model.eval()
         except Exception as e:
-            print('Exception %s occurred during train_model.' % e)
+            self.logger.error('Exception %s occurred during train_model.' % e)
 
     def check_model(self, validate=True):
         try:
@@ -84,10 +88,10 @@ class VGG19:
             accuracy = accuracy_score(true_labels, predicted_labels)
             precision = precision_score(true_labels, predicted_labels, average='weighted')
             # Print the validation results
-            print(f"{phase_name} Accuracy: {accuracy:.4f}")
-            print(f"{phase_name} Precision: {precision:.4f}")
+            self.logger.info(f"{phase_name} Accuracy: {accuracy:.4f}")
+            self.logger.info(f"{phase_name} Precision: {precision:.4f}")
         except Exception as e:
-            print('Exception %s occurred during check_model.' % e)
+            self.logger.error('Exception %s occurred during check_model.' % e)
 
 
 if __name__ == '__main__':
@@ -96,4 +100,4 @@ if __name__ == '__main__':
     vgg19.load_model()
     vgg19.train_model()
     vgg19.check_model(validate=True)
-    vgg19.check_model(validate=False)
+    # vgg19.check_model(validate=False)
