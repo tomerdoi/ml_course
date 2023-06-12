@@ -61,8 +61,8 @@ class YoloV5:
                     labels = labels.cpu().numpy()
                     accuracy = accuracy_score(labels, predicted)
                     precision = precision_score(labels, predicted, average='weighted')
-                    self.logger.info('Accuracy:', accuracy)
-                    self.logger.info('Precision:', precision)
+                    self.logger.info('Accuracy: %0.5f' % accuracy)
+                    self.logger.info('Precision: %0.5f' % precision)
                 epoch_loss = running_loss / len(self.dataloader)
                 self.logger.info(f"Epoch {epoch + 1}/{num_epochs}, Loss: {epoch_loss:.4f}")
         except Exception as e:
