@@ -1,5 +1,5 @@
 import os.path
-
+import random
 import numpy as np
 from logger_utils import LoggerUtils
 from sklearn.ensemble import ExtraTreesClassifier
@@ -26,13 +26,13 @@ class ETPipeline:
                         _, _, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy)
                     else:
                         X_imputed, y, X_test_imputed = self.preprocessor.preprocess_data(strategy=strategy, smote=True,
-                                                                                         iterations=1000)
+                                                                                         iterations=400)
                         np.save('X_imputed.npy', X_imputed)
                         np.save('y.npy', y)
                     self.logger.info('X len is: %s' % str(X_imputed.shape))
-                    clf = ExtraTreesClassifier(max_features='sqrt', max_leaf_nodes=30,
+                    clf = ExtraTreesClassifier(max_features='sqrt', max_leaf_nodes=45,
                                                n_estimators=2000, n_jobs=-1, random_state=12032022, max_depth=2000,
-                                               criterion="gini")
+                                               criterion="log_loss")
                     self.logger.info('Fitting model.')
                     clf.fit(X_imputed, y)
                     # # Perform cross-validation
