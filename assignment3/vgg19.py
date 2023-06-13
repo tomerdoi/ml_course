@@ -1,10 +1,9 @@
 import torch
+import global_conf
 from vgg_pytorch import VGG
 from data_loader import FlowerDataLoader
 from logger_utils import LoggerUtils
 from sklearn.metrics import accuracy_score, precision_score
-
-num_epochs = 10
 
 
 class VGG19:
@@ -35,10 +34,13 @@ class VGG19:
             criterion = torch.nn.CrossEntropyLoss()
             optimizer = torch.optim.SGD(self.model.parameters(), lr=0.001, momentum=0.9)
             # Training loop
-            for epoch in range(num_epochs):
+            for epoch in range(global_conf.num_epochs):
                 self.logger.info('Running on epoch %d.' % epoch)
                 self.model.train()
+                batch_idx = 0
                 for images, labels in self.dataloader:
+                    self.logger.info('Running on batch %d' % batch_idx)
+                    batch_idx += 1
                     optimizer.zero_grad()
                     outputs = self.model(images)
                     loss = criterion(outputs, labels)

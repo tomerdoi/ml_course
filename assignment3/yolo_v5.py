@@ -1,4 +1,5 @@
 import torch
+import global_conf
 import torch.nn as nn
 from logger_utils import LoggerUtils
 from data_loader import FlowerDataLoader
@@ -40,7 +41,7 @@ class YoloV5:
             criterion = nn.CrossEntropyLoss()
             optimizer = torch.optim.Adam(self.model.parameters())
             # Training loop
-            num_epochs = 10
+            num_epochs = global_conf.num_epochs
             for epoch in range(num_epochs):
                 self.logger.info('Running on epoch %d.' % epoch)
                 running_loss = 0.0
