@@ -6,6 +6,10 @@ import shutil
 import pandas as pd
 import random
 import yaml
+import os
+import scipy.io
+import numpy as np
+from PIL import Image  # Import the Image class from PIL (or Pillow)
 from pathlib import Path
 import scipy.io
 import torch
@@ -81,19 +85,21 @@ class YoloOOB:
     def generate_labels_cache(self, dataset_root, labels):
         try:
             labels_cache_path = os.path.join(dataset_root, "train.cache")
+            data_root = '/Users/tomerdoitshman/PycharmProjects/ml_course/assignment3/dataset/jpg'
             images = list(sorted([os.path.join(data_root, image_path) for image_path in glob.glob(data_root + '/*.jpg')]))
             labels_df = pd.DataFrame({"image": images, "label": labels})
             labels_df.to_csv(labels_cache_path, index=False)
+            self.convert_labels_to_yolo_format(images, dataset_root)
         except Exception as e:
             self.logger.error('Exception %s occurred during generate_labels_cache.' % e)
 
-    def train_yolov5_flowers(self, run):
+    def train_yolov5_flowers(self, run, labels_data):
         try:
             os.chdir('./yolov5')  # Replace with the path to the YOLOv5 repository
             # Split the dataset into training, validation, and test sets
             run_outputs_path = os.path.join(
                 '/Users/tomerdoitshman/PycharmProjects/ml_course/assignment3/outputs/yolo_outputs/', f"run_{run}")
-            self.split_dataset(data_root)
+            self.split_dataset('')
             # Convert the labels to integers
             labels = labels_data['labels'][0].tolist()
             # Generate labels cache file
@@ -143,9 +149,42 @@ class YoloOOB:
             self.split_dataset(data_root)
             # Train the models for each run
             for run in range(1, 3):
-                self.train_yolov5_flowers(run)
+                self.train_yolov5_flowers(run, labels_data)
         except Exception as e:
             self.logger.error('Exception %s occurred during run.' % e)
+
+    def convert_labels_to_yolo_format(self, image_paths, run_path):
+        try:
+            # Load the labels from the .mat file
+            labels_data = scipy.io.loadmat('/Users/tomerdoitshman/PycharmProjects/ml_course/assignment3/dataset/'
+                                           'imagelabels.mat')
+            labels = labels_data['labels'][0]
+            # Assuming you have a list of image file paths stored in 'image_paths'
+            # and each 'label' corresponds to the correct image file path in the same order
+            # Now, you can convert the labels and save them to the 'train.cache' file format.
+            yolov5_format_labels = []
+            for i, label in enumerate(labels):
+                class_index = label - 1  # Assuming class labels in the dataset are 1-indexed, while YOLOv5 requires 0-indexed
+                image_path = image_paths[i]
+                image = Image.open(image_path)
+                image_width, image_height = image.size
+                # Assuming you have the bounding box coordinates of the flower in the format [x_min, y_min, x_max, y_max]
+                # If you don't have the bounding box coordinates, you'll need to obtain them from the dataset or annotations.
+                x_min, y_min, x_max, y_max = [0.0, 0.0, 1.0, 1.0]  # Replace with actual bounding box coordinates
+                x_center = (x_min + x_max) / 2 / image_width
+                y_center = (y_min + y_max) / 2 / image_height
+                width = (x_max - x_min) / image_width
+                height = (y_max - y_min) / image_height
+                annotation = f"{class_index} {x_center} {y_center} {width} {height}"
+                yolov5_format_labels.append(annotation)
+            # Save the labels to train.cache
+            cache_file_path = os.path.join(run_path, "train.cache")
+            with open(cache_file_path, 'w') as cache_file:
+                for annotation in yolov5_format_labels:
+                    cache_file.write(annotation + '\n')
+            self.logger.info("Conversion to YOLOv5 format and train.cache file created successfully.")
+        except Exception as e:
+            self.logger.error('Exception %s occurred during convert_labels_to_yolo_format.' % e)
 
 
 if __name__ == '__main__':
