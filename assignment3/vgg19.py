@@ -159,5 +159,6 @@ if __name__ == '__main__':
     vgg19.train_model(num_epochs=20)
 
     best_model = torch.load('best.pt')
-    loss, accuracy = best_model.check_model(validate=False)
+    vgg19.model = best_model
+    loss, accuracy = vgg19.check_model(validate=False)
     print(f"Test {loss=}, {accuracy=}")
