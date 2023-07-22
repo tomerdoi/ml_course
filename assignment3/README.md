@@ -1,24 +1,22 @@
-##  Chapter 11: Implementing a Multilayer Artificial Neural Network from Scratch
+# Assignment 3 code
+This assignment was divided into 2 tasks:
+- Implementing neural network code
+- Creating classification CNN models.
 
-### Chapter Outline
+## Section A
+The code for this section is in `ch11.ipynb` file.
+This file contains implementation of 2 layers linear model, first with numpy,
+and second ith Tensorflow Keras.
 
-- Modeling complex functions with artificial neural networks
-  - Single-layer neural network recap
-  - Introducing the multilayer neural network architecture
-  - Activating a neural network via forward propagation
-- Classifying handwritten digits
-  - Obtaining the MNIST dataset
-  - Implementing a multilayer perceptron
-  - Coding the neural network training loop
-  - Evaluating the neural network performance
-- Training an artificial neural network
-  - Computing the loss function
-  - Developing your intuition for backpropagation
-  - Training neural networks via backpropagation
-- About the convergence in neural networks
-- A few last words about the neural network implementation
-- Summary
+The models trained on the MNIST datasets.
 
-**Please refer to the [README.md](../ch01/README.md) file in [`../ch01`](../ch01) for more information about running the code examples.**
+## Section B
+The rest of the code files are for this section. It contains training code for
+classification of 102 flowers dataset, based on `YOLOv5` and `VGG19` models.
 
+The `YOLO` based model achieved an accuracy of 98.6% on the test set,
+while the `VGG` model reached 90.3% accuracy. 
+Both models trained for 20 epochs.
 
+The weights for the `YOLO` model are available on this repo in the [weights](yolo-run-results/weights) folder,
+and the VGG weights are available on [Google Drive](https://drive.google.com/drive/folders/1z3YZmTb_KOfdh0_uqoMeXZrIiyh2_kc-?usp=sharing).
