@@ -9,7 +9,7 @@ from logger_utils import LoggerUtils
 class DatasetHandler:
     def __init__(self):
         self.logger_util = LoggerUtils()
-        self.logger = self.logger_util.init_logger(log_file_name='yolov5.log')
+        self.logger = self.logger_util.init_logger(log_file_name='dataset_handler.log')
 
     def load_south_german_credit(self):
         try:
