@@ -11,101 +11,75 @@ class OptimalK:
         self.logger = self.logger_util.init_logger(log_file_name='optimal_k.log')
 
     # todo: Need to run 1 time on 1 K value and get results, and not iterating over multiple K values
-    def elbow_method(self, clustering_model, data):
+    def elbow_method_metric(self, k, clustering_model, data):
         try:
-            sse = []  # List to store the SSE values for each k
-            K = range(1, clustering_model.n_clusters + 1)
-            for k in K:
-                clustering_model.n_clusters = k
-                labels = clustering_model.fit_predict(data)
-                sse.append(clustering_model.inertia_)  # SSE value for the current k
-            # Plot the SSE values against different k values
-            plt.figure(figsize=(8, 5))
-            plt.plot(K, sse, 'bx-')
-            plt.xlabel('Number of Clusters (k)')
-            plt.ylabel('Sum of Squared Errors (SSE)')
-            plt.title('Elbow Method for Optimal k')
-            plt.show()
+            clustering_model.n_clusters = k
+            labels = clustering_model.fit_predict(data)
+            metric_value = clustering_model.inertia_  # SSE value for the current k
+            return metric_value
         except Exception as e:
-            self.logger.error('Exception %s occurred during elbow_method.' % e)
+            self.logger.error('Exception %s occurred during elbow_method_metric.' % e)
 
-    def variance_ratio_criterion(self, clustering_model, data):
+    def variance_ratio_criterion_metric(self, k, clustering_model, data):
         try:
-            calinski_scores = []
-            K = range(2, clustering_model.n_clusters + 1)
-            for k in K:
-                clustering_model.n_clusters = k
-                labels = clustering_model.fit_predict(data)
-                calinski_scores.append(calinski_harabasz_score(data, labels))
-            # Plot the Calinski and Harabasz scores against different k values
-            plt.figure(figsize=(8, 5))
-            plt.plot(K, calinski_scores, 'bx-')
-            plt.xlabel('Number of Clusters (k)')
-            plt.ylabel('Calinski and Harabasz Score')
-            plt.title('Variance Ratio Criterion for Optimal k')
-            plt.show()
+            clustering_model.n_clusters = k
+            labels = clustering_model.fit_predict(data)
+            metric_value = calinski_harabasz_score(data, labels)
+            return metric_value
         except Exception as e:
-            self.logger.error('Exception %s occurred during variance_ratio_criterion.' % e)
+            self.logger.error('Exception %s occurred during variance_ratio_criterion_metric.' % e)
 
-    def davies_bouldin(self, clustering_model, data):
+    def davies_bouldin_metric(self, k, clustering_model, data):
         try:
-            db_scores = []
-            K = range(2, clustering_model.n_clusters + 1)
-            for k in K:
-                clustering_model.n_clusters = k
-                labels = clustering_model.fit_predict(data)
-                db_scores.append(davies_bouldin_score(data, labels))
-            # Plot the Davies-Bouldin scores against different k values
-            plt.figure(figsize=(8, 5))
-            plt.plot(K, db_scores, 'bx-')
-            plt.xlabel('Number of Clusters (k)')
-            plt.ylabel('Davies-Bouldin Score')
-            plt.title('Davies-Bouldin Score for Optimal k')
-            plt.show()
+            clustering_model.n_clusters = k
+            labels = clustering_model.fit_predict(data)
+            metric_value = davies_bouldin_score(data, labels)
+            return metric_value
         except Exception as e:
-            self.logger.error('Exception %s occurred during davies_bouldin.' % e)
+            self.logger.error('Exception %s occurred during davies_bouldin_metric.' % e)
 
-    def silhouette(self, clustering_model, data):
+    def silhouette_metric(self, k, clustering_model, data):
         try:
-            silhouette_scores = []
-            K = range(2, clustering_model.n_clusters + 1)
-            for k in K:
-                clustering_model.n_clusters = k
-                labels = clustering_model.fit_predict(data)
-                silhouette_scores.append(silhouette_score(data, labels))
-            # Plot the Silhouette scores against different k values
-            plt.figure(figsize=(8, 5))
-            plt.plot(K, silhouette_scores, 'bx-')
-            plt.xlabel('Number of Clusters (k)')
-            plt.ylabel('Silhouette Score')
-            plt.title('Silhouette Score for Optimal k')
-            plt.show()
+            clustering_model.n_clusters = k
+            labels = clustering_model.fit_predict(data)
+            metric_value = silhouette_score(data, labels)
+            return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during silhouette.' % e)
 
-    # custom method
-    def custom_clustering_validity(self, clustering_model, data):
+    def custom_clustering_validity_metric(self, k, clustering_model, data):
         try:
-            db_normalized_scores = []
-            K = range(2, clustering_model.n_clusters + 1)
             # Calculate the maximum possible Davies-Bouldin Index for single-sample clusters
             max_dbi = davies_bouldin_score(data.iloc[:, :-1], data.iloc[:, -1].values.reshape(-1, 1))
-            for k in K:
-                clustering_model.n_clusters = k
-                labels = clustering_model.fit_predict(data)
-                db_score = davies_bouldin_score(data.iloc[:, :-1], labels)
-                # Normalize the Davies-Bouldin Index by dividing by the maximum possible score
-                db_normalized = db_score / max_dbi
-                db_normalized_scores.append(db_normalized)
-            # Plot the normalized Davies-Bouldin scores against different k values
+            clustering_model.n_clusters = k
+            labels = clustering_model.fit_predict(data)
+            db_score = davies_bouldin_score(data.iloc[:, :-1], labels)
+            # Normalize the Davies-Bouldin Index by dividing by the maximum possible score
+            db_normalized = db_score / max_dbi
+            metric_value = db_normalized
+            return metric_value
+        except Exception as e:
+            self.logger.error('Exception %s occurred during custom_clustering_validity_metric.' % e)
+
+    def underscore_to_capital_space(self, s):
+        words = s.split('_')
+        capitalized_words = [word.capitalize() for word in words]
+        return ' '.join(capitalized_words)
+
+    def plot_optimal_k_figure(self, dataset_name, metric_name, dataset_results):
+        try:
+            K = list(dataset_results.keys())
+            scores = [dataset_results[k][metric_name] for k in dataset_results]
             plt.figure(figsize=(8, 5))
-            plt.plot(K, db_normalized_scores, 'bx-')
+            plt.plot(K, scores, 'bx-')
+            metric_name = self.underscore_to_capital_space(metric_name)
+            dataset_name = self.underscore_to_capital_space(dataset_name)
             plt.xlabel('Number of Clusters (k)')
-            plt.ylabel('Normalized Davies-Bouldin Score')
-            plt.title('Custom Clustering Validity Metric for Optimal k')
+            plt.ylabel('%s Score' % metric_name)
+            plt.title('%s Metric for Optimal k for dataset %s' % (metric_name, dataset_name))
             plt.show()
         except Exception as e:
-            self.logger.error('Exception %s occurred during custom_clustering_validity.' % e)
+            self.logger.error('Exception %s occurred during plot_optimal_k_figure.' % e)
 
 
 if __name__ == '__main__':
