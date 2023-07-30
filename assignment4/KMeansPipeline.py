@@ -20,9 +20,8 @@ class KMeansPipeline:
                 dataset_results = {}
                 for k in k_values:
                     print(f"K = {k}")
-                    kmeans_result = self.run_clustering_algorithm(KMeans(n_clusters=k), dataset)
                     algo = KMeans(n_clusters=k)
-                    clustering_metrics = self.measure_clustering_metrics(k, algo, dataset, kmeans_result)
+                    clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
                     dataset_results[k] = clustering_metrics
                 self.optimal_k.plot_optimal_k_figure(dataset_name, 'elbow_method', dataset_results)
                 results[dataset_name] = dataset_results
@@ -30,19 +29,10 @@ class KMeansPipeline:
         except Exception as e:
             self.logger.error('Exception %s occurred during run_pipeline.' % e)
 
-    def run_clustering_algorithm(self, clustering_model, dataset):
-        try:
-            clustering_model.fit(dataset.iloc[:, :-1])  # Fit the clustering model to the numeric features
-            # (excluding the last column)
-            return clustering_model
-        except Exception as e:
-            self.logger.error('Exception %s occurred during run_clustering_algorithm.' % e)
-
-    def measure_clustering_metrics(self, k, clustering_model, dataset, clustering_result):
+    def measure_clustering_metrics(self, k, clustering_model, dataset):
         try:
             # drop the last column of the dataset
             dataset = dataset.drop(dataset.columns[-1], axis=1)
-            labels = clustering_result.labels_
             metrics = {
                 'elbow_method': self.optimal_k.elbow_method_metric(k, clustering_model, dataset),
                 'variance_ratio_criterion': self.optimal_k.variance_ratio_criterion_metric(k, clustering_model,

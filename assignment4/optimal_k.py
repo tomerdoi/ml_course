@@ -45,7 +45,7 @@ class OptimalK:
             metric_value = silhouette_score(data, labels)
             return metric_value
         except Exception as e:
-            self.logger.error('Exception %s occurred during silhouette.' % e)
+            self.logger.error('Exception %s occurred during silhouette_metric.' % e)
 
     def custom_clustering_validity_metric(self, k, clustering_model, data):
         try:
