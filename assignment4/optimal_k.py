@@ -1,6 +1,7 @@
 from logger_utils import LoggerUtils
 import pandas as pd
 import numpy as np
+from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silhouette_score
 
@@ -11,48 +12,57 @@ class OptimalK:
         self.logger = self.logger_util.init_logger(log_file_name='optimal_k.log')
 
     # todo: Need to run 1 time on 1 K value and get results, and not iterating over multiple K values
-    def elbow_method_metric(self, k, clustering_model, data):
+    def elbow_method_metric(self, k, clustering_model, data, labels):
         try:
             clustering_model.n_clusters = k
-            labels = clustering_model.fit_predict(data)
-            metric_value = clustering_model.inertia_  # SSE value for the current k
+            if clustering_model.__class__.__name__ == 'DBSCAN':
+                # Get the core points and their coordinates
+                core_samples_mask = np.zeros_like(labels, dtype=bool)
+                core_samples_mask[clustering_model.core_sample_indices_] = True
+                core_points = data[core_samples_mask]
+                # Ensure that core_points is 2D even if it contains only one core point
+                if len(core_points.shape) == 1:
+                    core_points = core_points.reshape(1, -1)
+                # Calculate distances between all points and core points
+                distances = cdist(data, core_points)
+                # Find the nearest core point for each non-core point
+                nearest_core_indices = np.min(distances, axis=1)
+                metric_value = np.sum([dist ** 2 for dist in nearest_core_indices])
+            else:
+                metric_value = clustering_model.inertia_  # SSE value for the current k
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during elbow_method_metric.' % e)
 
-    def variance_ratio_criterion_metric(self, k, clustering_model, data):
+    def variance_ratio_criterion_metric(self, k, clustering_model, data, labels):
         try:
             clustering_model.n_clusters = k
-            labels = clustering_model.fit_predict(data)
             metric_value = calinski_harabasz_score(data, labels)
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during variance_ratio_criterion_metric.' % e)
 
-    def davies_bouldin_metric(self, k, clustering_model, data):
+    def davies_bouldin_metric(self, k, clustering_model, data, labels):
         try:
             clustering_model.n_clusters = k
-            labels = clustering_model.fit_predict(data)
             metric_value = davies_bouldin_score(data, labels)
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during davies_bouldin_metric.' % e)
 
-    def silhouette_metric(self, k, clustering_model, data):
+    def silhouette_metric(self, k, clustering_model, data, labels):
         try:
             clustering_model.n_clusters = k
-            labels = clustering_model.fit_predict(data)
             metric_value = silhouette_score(data, labels)
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during silhouette_metric.' % e)
 
-    def custom_clustering_validity_metric(self, k, clustering_model, data):
+    def custom_clustering_validity_metric(self, k, clustering_model, data, labels):
         try:
             # Calculate the maximum possible Davies-Bouldin Index for single-sample clusters
             max_dbi = davies_bouldin_score(data.iloc[:, :-1], data.iloc[:, -1].values.reshape(-1, 1))
             clustering_model.n_clusters = k
-            labels = clustering_model.fit_predict(data)
             db_score = davies_bouldin_score(data.iloc[:, :-1], labels)
             # Normalize the Davies-Bouldin Index by dividing by the maximum possible score
             db_normalized = db_score / max_dbi

@@ -33,14 +33,15 @@ class KMeansPipeline:
         try:
             # drop the last column of the dataset
             dataset = dataset.drop(dataset.columns[-1], axis=1)
+            labels = clustering_model.fit_predict(dataset)
             metrics = {
-                'elbow_method': self.optimal_k.elbow_method_metric(k, clustering_model, dataset),
+                'elbow_method': self.optimal_k.elbow_method_metric(k, clustering_model, dataset, labels),
                 'variance_ratio_criterion': self.optimal_k.variance_ratio_criterion_metric(k, clustering_model,
-                                                                                           dataset),
-                'davies_bouldin': self.optimal_k.davies_bouldin_metric(k, clustering_model, dataset),
-                'silhouette': self.optimal_k.silhouette_metric(k, clustering_model, dataset),
+                                                                                           dataset, labels),
+                'davies_bouldin': self.optimal_k.davies_bouldin_metric(k, clustering_model, dataset, labels),
+                'silhouette': self.optimal_k.silhouette_metric(k, clustering_model, dataset, labels),
                 'custom_clustering_validity': self.optimal_k.custom_clustering_validity_metric(k, clustering_model,
-                                                                                               dataset)
+                                                                                               dataset, labels)
             }
             return metrics
         except Exception as e:
