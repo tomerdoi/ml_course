@@ -28,6 +28,25 @@ class OptimalK:
                 # Find the nearest core point for each non-core point
                 nearest_core_indices = np.min(distances, axis=1)
                 metric_value = np.sum([dist ** 2 for dist in nearest_core_indices])
+            elif clustering_model.__class__.__name__ == 'AgglomerativeClustering':
+                linkage_matrix = clustering_model.children_
+                # Calculate the number of data points in each merged cluster
+                n_samples = data.shape[0]
+                cluster_sizes = np.zeros(2 * n_samples - 1)
+                cluster_sizes[:n_samples] = 1
+                for i in range(n_samples - 1, 2 * n_samples - 1):
+                    child_1, child_2 = linkage_matrix[i - n_samples]
+                    cluster_sizes[i] = cluster_sizes[child_1] + cluster_sizes[child_2]
+                # Calculate the SSE value for the current k
+                centers = np.array([data[labels == j].mean(axis=0) for j in range(k)])
+                distances = cdist(data, centers, 'euclidean')
+                sse_per_cluster = np.array([np.sum(distances[labels == j] ** 2) for j in range(k)])
+                metric_value = np.sum(sse_per_cluster)
+            elif clustering_model.__class__.__name__ == 'OPTICS':
+                # Calculate the OPTICS SSE variant considering only finite reachability distances
+                reachability_distances = clustering_model.reachability_
+                finite_reachability_distances = reachability_distances[np.isfinite(reachability_distances)]
+                metric_value = np.sum(finite_reachability_distances ** 2)
             else:
                 metric_value = clustering_model.inertia_  # SSE value for the current k
             return metric_value

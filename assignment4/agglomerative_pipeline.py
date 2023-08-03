@@ -1,14 +1,14 @@
 from optimal_k import OptimalK
-from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering
 from logger_utils import LoggerUtils
 from dataset_handler import DatasetHandler
 
 
-class KMeansPipeline:
+class AgglomerativePipeline:  # 2. Rename the class to AgglomerativePipeline
     def __init__(self):
         self.optimal_k = OptimalK()
         self.logger_util = LoggerUtils()
-        self.logger = self.logger_util.init_logger(log_file_name='kmeans_pipeline.log')
+        self.logger = self.logger_util.init_logger(log_file_name='agglomerative_pipeline.log')
 
     def run_pipeline(self, datasets):
         try:
@@ -16,11 +16,11 @@ class KMeansPipeline:
             k_values = list(range(2, 31)) + list(range(35, 100, 5)) + list(range(100, 1001, 25))
             results = {}
             for dataset_name, dataset in datasets.items():
-                print(f"Running K-Means pipeline for dataset: {dataset_name}")
+                print(f"Running Agglomerative pipeline for dataset: {dataset_name}")  # Update the message
                 dataset_results = {}
                 for k in k_values:
                     print(f"K = {k}")
-                    algo = KMeans(n_clusters=k)
+                    algo = AgglomerativeClustering(n_clusters=k)  # Use AgglomerativeClustering
                     clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
                     dataset_results[k] = clustering_metrics
                 self.optimal_k.plot_optimal_k_figure(dataset_name, 'elbow_method', dataset_results)
@@ -58,6 +58,6 @@ if __name__ == '__main__':
     datasets = {'south_german_credit_ds': south_german_credit_ds,
                 'icmla_2014_accepted_papers_ds': icmla_2014_accepted_papers_ds,
                 'parking_birmingham_ds': parking_birmingham_ds}
-    pipeline = KMeansPipeline()
+    pipeline = AgglomerativePipeline()  # Update the instance to use AgglomerativePipeline
     results = pipeline.run_pipeline(datasets)
     print(results)

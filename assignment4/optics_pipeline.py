@@ -1,28 +1,28 @@
 from optimal_k import OptimalK
-from sklearn.cluster import KMeans
+from sklearn.cluster import OPTICS  # 1. Import OPTICS
 from logger_utils import LoggerUtils
 from dataset_handler import DatasetHandler
 
 
-class KMeansPipeline:
+class OPTICSPipeline:  # 2. Rename the class to OPTICSPipeline
     def __init__(self):
         self.optimal_k = OptimalK()
         self.logger_util = LoggerUtils()
-        self.logger = self.logger_util.init_logger(log_file_name='kmeans_pipeline.log')
+        self.logger = self.logger_util.init_logger(log_file_name='optics_pipeline.log')
 
     def run_pipeline(self, datasets):
         try:
             # todo: to check ranges, according to the assignments instructions it should include 1 which is impossible
-            k_values = list(range(2, 31)) + list(range(35, 100, 5)) + list(range(100, 1001, 25))
+            min_samples_values = list(range(1, 21))
             results = {}
             for dataset_name, dataset in datasets.items():
-                print(f"Running K-Means pipeline for dataset: {dataset_name}")
+                print(f"Running OPTICS pipeline for dataset: {dataset_name}")  # Update the message
                 dataset_results = {}
-                for k in k_values:
-                    print(f"K = {k}")
-                    algo = KMeans(n_clusters=k)
-                    clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
-                    dataset_results[k] = clustering_metrics
+                for min_samples in min_samples_values:
+                    print(f"min_samples = {min_samples}")
+                    algo = OPTICS(min_samples=min_samples)  # Use OPTICS and set min_samples=k
+                    clustering_metrics = self.measure_clustering_metrics(min_samples, algo, dataset)
+                    dataset_results[min_samples] = clustering_metrics
                 self.optimal_k.plot_optimal_k_figure(dataset_name, 'elbow_method', dataset_results)
                 results[dataset_name] = dataset_results
             return results
@@ -58,6 +58,6 @@ if __name__ == '__main__':
     datasets = {'south_german_credit_ds': south_german_credit_ds,
                 'icmla_2014_accepted_papers_ds': icmla_2014_accepted_papers_ds,
                 'parking_birmingham_ds': parking_birmingham_ds}
-    pipeline = KMeansPipeline()
+    pipeline = OPTICSPipeline()  # Update the instance to use OPTICSPipeline
     results = pipeline.run_pipeline(datasets)
     print(results)
