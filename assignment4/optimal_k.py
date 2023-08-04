@@ -56,6 +56,9 @@ class OptimalK:
     def variance_ratio_criterion_metric(self, k, clustering_model, data, labels):
         try:
             clustering_model.n_clusters = k
+            unique_labels = len(set(labels))
+            if unique_labels < 2 or unique_labels >= len(data):
+                return None  # Return None to indicate inability to evaluate clustering
             metric_value = calinski_harabasz_score(data, labels)
             return metric_value
         except Exception as e:
@@ -64,6 +67,9 @@ class OptimalK:
     def davies_bouldin_metric(self, k, clustering_model, data, labels):
         try:
             clustering_model.n_clusters = k
+            unique_labels = len(set(labels))
+            if unique_labels < 2 or unique_labels >= len(data):
+                return None  # Return None to indicate inability to evaluate clustering
             metric_value = davies_bouldin_score(data, labels)
             return metric_value
         except Exception as e:
@@ -72,6 +78,9 @@ class OptimalK:
     def silhouette_metric(self, k, clustering_model, data, labels):
         try:
             clustering_model.n_clusters = k
+            unique_labels = len(set(labels))
+            if unique_labels < 2 or unique_labels >= len(data):
+                return None  # Return None to indicate inability to evaluate clustering
             metric_value = silhouette_score(data, labels)
             return metric_value
         except Exception as e:
@@ -80,6 +89,9 @@ class OptimalK:
     def custom_clustering_validity_metric(self, k, clustering_model, data, labels):
         try:
             # Calculate the maximum possible Davies-Bouldin Index for single-sample clusters
+            unique_labels = len(set(labels))
+            if unique_labels < 2 or unique_labels >= len(data):
+                return None  # Return None to indicate inability to evaluate clustering
             max_dbi = davies_bouldin_score(data.iloc[:, :-1], data.iloc[:, -1].values.reshape(-1, 1))
             clustering_model.n_clusters = k
             db_score = davies_bouldin_score(data.iloc[:, :-1], labels)
