@@ -37,6 +37,7 @@ class DBSCANPipeline:
         try:
             # drop the last column of the dataset
             dataset = dataset.drop(dataset.columns[-1], axis=1)
+            true_labels = dataset.iloc[:, -1].tolist()
             labels = clustering_model.fit_predict(dataset)
             metrics = {
                 'elbow_method': self.optimal_k.elbow_method_metric(None, clustering_model, dataset, labels),
@@ -45,7 +46,8 @@ class DBSCANPipeline:
                 'davies_bouldin': self.optimal_k.davies_bouldin_metric(None, clustering_model, dataset, labels),
                 'silhouette': self.optimal_k.silhouette_metric(None, clustering_model, dataset, labels),
                 'custom_clustering_validity': self.optimal_k.custom_clustering_validity_metric(None, clustering_model,
-                                                                                               dataset, labels)
+                                                                                               dataset, labels,
+                                                                                               true_labels)
             }
             return metrics
         except Exception as e:

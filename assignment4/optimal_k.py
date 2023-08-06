@@ -86,15 +86,16 @@ class OptimalK:
         except Exception as e:
             self.logger.error('Exception %s occurred during silhouette_metric.' % e)
 
-    def custom_clustering_validity_metric(self, k, clustering_model, data, labels):
+    def custom_clustering_validity_metric(self, k, clustering_model, data, labels, true_labels):
         try:
             # Calculate the maximum possible Davies-Bouldin Index for single-sample clusters
             unique_labels = len(set(labels))
             if unique_labels < 2 or unique_labels >= len(data):
                 return None  # Return None to indicate inability to evaluate clustering
-            max_dbi = davies_bouldin_score(data.iloc[:, :-1], data.iloc[:, -1].values.reshape(-1, 1))
+            true_labels = np.array(true_labels).reshape(-1, 1)
+            max_dbi = davies_bouldin_score(data, true_labels)
             clustering_model.n_clusters = k
-            db_score = davies_bouldin_score(data.iloc[:, :-1], labels)
+            db_score = davies_bouldin_score(data, labels)
             # Normalize the Davies-Bouldin Index by dividing by the maximum possible score
             db_normalized = db_score / max_dbi
             metric_value = db_normalized
