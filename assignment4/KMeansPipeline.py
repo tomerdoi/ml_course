@@ -1,13 +1,12 @@
 from optimal_k import OptimalK
 from sklearn.cluster import KMeans
-from logger_utils import LoggerUtils
+from pipeline import Pipeline
 from dataset_handler import DatasetHandler
 
 
-class KMeansPipeline:
+class KMeansPipeline(Pipeline):
     def __init__(self):
-        self.optimal_k = OptimalK()
-        self.logger_util = LoggerUtils()
+        super().__init__()  # Call the parent class constructor first
         self.logger = self.logger_util.init_logger(log_file_name='kmeans_pipeline.log')
 
     def run_pipeline(self, datasets):
@@ -23,31 +22,11 @@ class KMeansPipeline:
                     algo = KMeans(n_clusters=k)
                     clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
                     dataset_results[k] = clustering_metrics
-                self.optimal_k.plot_optimal_k_figure(dataset_name, 'elbow_method', dataset_results)
+                self.optimal_k.plot_optimal_k_figure(dataset_name, 'SSE-Elbow', dataset_results)
                 results[dataset_name] = dataset_results
             return results
         except Exception as e:
             self.logger.error('Exception %s occurred during run_pipeline.' % e)
-
-    def measure_clustering_metrics(self, k, clustering_model, dataset):
-        try:
-            # drop the last column of the dataset
-            true_labels = dataset.iloc[:, -1].tolist()
-            dataset = dataset.drop(dataset.columns[-1], axis=1)
-            labels = clustering_model.fit_predict(dataset)
-            metrics = {
-                'elbow_method': self.optimal_k.elbow_method_metric(k, clustering_model, dataset, labels),
-                'variance_ratio_criterion': self.optimal_k.variance_ratio_criterion_metric(k, clustering_model,
-                                                                                           dataset, labels),
-                'davies_bouldin': self.optimal_k.davies_bouldin_metric(k, clustering_model, dataset, labels),
-                'silhouette': self.optimal_k.silhouette_metric(k, clustering_model, dataset, labels),
-                'custom_clustering_validity': self.optimal_k.custom_clustering_validity_metric(k, clustering_model,
-                                                                                               dataset, labels,
-                                                                                               true_labels)
-            }
-            return metrics
-        except Exception as e:
-            self.logger.error('Exception %s occurred during measure_clustering_metrics.' % e)
 
 
 if __name__ == '__main__':
