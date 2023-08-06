@@ -1,16 +1,23 @@
+from abc import ABC, abstractmethod
+
+import numpy as np
+import pandas as pd
+from sklearn.base import ClusterMixin
+
 from optimal_k import OptimalK
 from logger_utils import LoggerUtils
 
 
-class Pipeline:
+class Pipeline(ABC):
     def __init__(self):
         self.optimal_k = OptimalK()
         self.logger_util = LoggerUtils()
 
-    def run_pipeline(self, datasets):
-       pass
+    @abstractmethod
+    def run_pipeline(self, datasets) -> dict:
+        raise NotImplemented
 
-    def measure_clustering_metrics(self, k, clustering_model, dataset):
+    def measure_clustering_metrics(self, k: int, clustering_model: ClusterMixin, dataset: pd.DataFrame):
         try:
             # drop the last column of the dataset
             true_labels = dataset.iloc[:, -1].tolist()

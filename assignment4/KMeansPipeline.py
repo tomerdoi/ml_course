@@ -1,3 +1,6 @@
+from typing import Dict
+
+import pandas as pd
 from sklearn.cluster import KMeans
 from pipeline import Pipeline
 from dataset_handler import DatasetHandler
@@ -8,7 +11,7 @@ class KMeansPipeline(Pipeline):
         super().__init__()  # Call the parent class constructor first
         self.logger = self.logger_util.init_logger(log_file_name='kmeans_pipeline.log')
 
-    def run_pipeline(self, datasets):
+    def run_pipeline(self, datasets: Dict[str, pd.DataFrame]) -> dict:
         try:
             # todo: to check ranges, according to the assignments instructions it should include 1 which is impossible
             k_values = list(range(2, 31)) + list(range(35, 100, 5)) + list(range(100, 1001, 25))

@@ -1,3 +1,8 @@
+from typing import Dict
+
+from sklearn.base import ClusterMixin
+from sklearn.cluster import DBSCAN, AgglomerativeClustering, OPTICS, KMeans
+
 from logger_utils import LoggerUtils
 import pandas as pd
 import numpy as np
@@ -12,10 +17,10 @@ class OptimalK:
         self.logger = self.logger_util.init_logger(log_file_name='optimal_k.log')
 
     # todo: Need to run 1 time on 1 K value and get results, and not iterating over multiple K values
-    def elbow_method_metric(self, k, clustering_model, data, labels):
+    def elbow_method_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list) -> float:
         try:
             clustering_model.n_clusters = k
-            if clustering_model.__class__.__name__ == 'DBSCAN':
+            if isinstance(clustering_model, DBSCAN):
                 # Get the core points and their coordinates
                 core_samples_mask = np.zeros_like(labels, dtype=bool)
                 core_samples_mask[clustering_model.core_sample_indices_] = True
@@ -28,7 +33,7 @@ class OptimalK:
                 # Find the nearest core point for each non-core point
                 nearest_core_indices = np.min(distances, axis=1)
                 metric_value = np.sum([dist ** 2 for dist in nearest_core_indices])
-            elif clustering_model.__class__.__name__ == 'AgglomerativeClustering':
+            elif isinstance(clustering_model, AgglomerativeClustering):
                 linkage_matrix = clustering_model.children_
                 # Calculate the number of data points in each merged cluster
                 n_samples = data.shape[0]
@@ -42,18 +47,20 @@ class OptimalK:
                 distances = cdist(data, centers, 'euclidean')
                 sse_per_cluster = np.array([np.sum(distances[labels == j] ** 2) for j in range(k)])
                 metric_value = np.sum(sse_per_cluster)
-            elif clustering_model.__class__.__name__ == 'OPTICS':
+            elif isinstance(clustering_model, OPTICS):
                 # Calculate the OPTICS SSE variant considering only finite reachability distances
                 reachability_distances = clustering_model.reachability_
                 finite_reachability_distances = reachability_distances[np.isfinite(reachability_distances)]
                 metric_value = np.sum(finite_reachability_distances ** 2)
-            else:
+            elif isinstance(clustering_model, KMeans):
                 metric_value = clustering_model.inertia_  # SSE value for the current k
+            else:
+                return None
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during elbow_method_metric.' % e)
 
-    def variance_ratio_criterion_metric(self, k, clustering_model, data, labels):
+    def variance_ratio_criterion_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
         try:
             clustering_model.n_clusters = k
             unique_labels = len(set(labels))
@@ -64,7 +71,7 @@ class OptimalK:
         except Exception as e:
             self.logger.error('Exception %s occurred during variance_ratio_criterion_metric.' % e)
 
-    def davies_bouldin_metric(self, k, clustering_model, data, labels):
+    def davies_bouldin_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
         try:
             clustering_model.n_clusters = k
             unique_labels = len(set(labels))
@@ -75,7 +82,7 @@ class OptimalK:
         except Exception as e:
             self.logger.error('Exception %s occurred during davies_bouldin_metric.' % e)
 
-    def silhouette_metric(self, k, clustering_model, data, labels):
+    def silhouette_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
         try:
             clustering_model.n_clusters = k
             unique_labels = len(set(labels))
@@ -86,7 +93,8 @@ class OptimalK:
         except Exception as e:
             self.logger.error('Exception %s occurred during silhouette_metric.' % e)
 
-    def custom_clustering_validity_metric(self, k, clustering_model, data, labels, true_labels):
+    def custom_clustering_validity_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame,
+                                          labels: list, true_labels: list):
         try:
             # Calculate the maximum possible Davies-Bouldin Index for single-sample clusters
             unique_labels = len(set(labels))
@@ -109,7 +117,7 @@ class OptimalK:
         capitalized_words = [word.capitalize() for word in words]
         return ' '.join(capitalized_words)
 
-    def plot_optimal_k_figure(self, dataset_name, metric_name, dataset_results):
+    def plot_optimal_k_figure(self, dataset_name: str, metric_name: str, dataset_results: Dict[int, Dict[str, float]]):
         try:
             K = list(dataset_results.keys())
             scores = [result[metric_name] for result in dataset_results.values()]
