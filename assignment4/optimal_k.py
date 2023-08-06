@@ -103,7 +103,8 @@ class OptimalK:
         except Exception as e:
             self.logger.error('Exception %s occurred during custom_clustering_validity_metric.' % e)
 
-    def underscore_to_capital_space(self, s):
+    @staticmethod
+    def _underscore_to_capital_space(s):
         words = s.split('_')
         capitalized_words = [word.capitalize() for word in words]
         return ' '.join(capitalized_words)
@@ -111,11 +112,11 @@ class OptimalK:
     def plot_optimal_k_figure(self, dataset_name, metric_name, dataset_results):
         try:
             K = list(dataset_results.keys())
-            scores = [dataset_results[k][metric_name] for k in dataset_results]
+            scores = [result[metric_name] for result in dataset_results.values()]
             plt.figure(figsize=(8, 5))
             plt.plot(K, scores, 'bx-')
-            metric_name = self.underscore_to_capital_space(metric_name)
-            dataset_name = self.underscore_to_capital_space(dataset_name)
+            metric_name = self._underscore_to_capital_space(metric_name)
+            dataset_name = self._underscore_to_capital_space(dataset_name)
             plt.xlabel('Number of Clusters (k)')
             plt.ylabel('%s Score' % metric_name)
             plt.title('%s Metric for Optimal k for dataset %s' % (metric_name, dataset_name))

@@ -16,7 +16,7 @@ class Pipeline:
             true_labels = dataset.iloc[:, -1].tolist()
             dataset = dataset.drop(dataset.columns[-1], axis=1)
             labels = clustering_model.fit_predict(dataset)
-            unique_labels = len(set(list(labels)))
+            unique_labels = np.unique(labels).tolist()
             metrics = {
                 'unique_labels': unique_labels,
                 'SSE-Elbow': self.optimal_k.elbow_method_metric(k, clustering_model, dataset, labels),
