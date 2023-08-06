@@ -1,6 +1,5 @@
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-import global_conf
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from logger_utils import LoggerUtils
@@ -13,12 +12,10 @@ class DatasetHandler:
 
     def load_south_german_credit(self):
         try:
-            asc_file_path = '/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment4/' \
-                            'datasets/south+german+credit+update/south+german+credit+update/SouthGermanCredit.asc'
+            asc_file_path = './datasets/south+german+credit+update/SouthGermanCredit.asc'
             with open(asc_file_path, 'r') as f:
                 # Skip the header lines (usually 6 lines in an ASC file)
-                for _ in range(1):
-                    f.readline()
+                f.readline()
                 # Read the data and store it in a 2D numpy array
                 data = np.loadtxt(f)
             # to add column names using codetable file
@@ -34,8 +31,7 @@ class DatasetHandler:
 
     def load_icmla_2014_accepted_papers_data_set(self):
         try:
-            csv_file_path = '/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment4/' \
-                            'datasets/icmla+2014+accepted+papers+data+set/ICMLA_2014.csv'
+            csv_file_path = './datasets/icmla+2014+accepted+papers+data+set/ICMLA_2014.csv'
             data = pd.read_csv(csv_file_path, encoding='ISO-8859-1')
             # convert text features to numeric
             # Create a list of the textual columns to convert
@@ -62,14 +58,14 @@ class DatasetHandler:
 
     def load_parking_birmingham_data_set(self):
         try:
-            csv_file_path = '/Users/tomerdoitshman/Desktop/D/Courses/ML_course/course_assignments/assignment4/' \
-                            'datasets/parking+birmingham/dataset.csv'
+            csv_file_path = './datasets/parking+birmingham/dataset.csv'
             data = pd.read_csv(csv_file_path)
             # Assuming you already have the DataFrame 'data' with the dataset
             # If 'LastUpdated' is not in datetime format, convert it to datetime first
             data['LastUpdated'] = pd.to_datetime(data['LastUpdated'])
             # Convert 'LastUpdated' to numeric (timestamp) representation
-            data['LastUpdated'] = data['LastUpdated'].astype(int)
+            # in some os the default int is int32 which not compatible with the pandas datetime
+            data['LastUpdated'] = data['LastUpdated'].astype(np.int64)
             # Move the 'SystemCodeNumber' column to the last position
             data = data[[col for col in data.columns if col != 'SystemCodeNumber'] + ['SystemCodeNumber']]
             # Now 'data' has the 'LastUpdated' column converted to numeric and 'SystemCodeNumber'
