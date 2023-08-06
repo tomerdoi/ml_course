@@ -1,4 +1,3 @@
-from optimal_k import OptimalK
 from sklearn.cluster import KMeans
 from pipeline import Pipeline
 from dataset_handler import DatasetHandler
