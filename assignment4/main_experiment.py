@@ -3,7 +3,7 @@ import pandas as pd
 from KMeansPipeline import KMeansPipeline
 from DBSCANPipeline import DBSCANPipeline
 from agglomerative_pipeline import AgglomerativePipeline
-from assignment4.pipeline import Pipeline
+from pipeline import Pipeline
 from optics_pipeline import OPTICSPipeline
 import global_conf
 from logger_utils import LoggerUtils
