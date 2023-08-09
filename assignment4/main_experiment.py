@@ -51,6 +51,7 @@ class MainExperiment:  # 2. Rename the class to AgglomerativePipeline
                                                        metric_value, unique_labels]
 
             self.results = pd.concat([self.results, final_df], ignore_index=True)
+            self.results.to_csv(self.report_path, index=False)
         except Exception as e:
             self.logger.error('Exception %s occurred during algo_experiment.' % e)
 
