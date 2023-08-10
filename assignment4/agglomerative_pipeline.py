@@ -15,9 +15,14 @@ class AgglomerativePipeline(Pipeline):  # 2. Rename the class to AgglomerativePi
             results = {}
             for dataset_name, dataset in datasets.items():
                 print(f"Running Agglomerative pipeline for dataset: {dataset_name}")  # Update the message
+                samples = len(dataset)
                 dataset_results = {}
                 for k in k_values:
                     print(f"K = {k}")
+                    if k > samples:
+                        self.logger.info(f"Stopped running since the number of clusters ({k}) is bigger than the "
+                                         f"number of samples ({samples})")
+                        break
                     algo = AgglomerativeClustering(n_clusters=k)  # Use AgglomerativeClustering
                     clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
                     dataset_results[k] = clustering_metrics
