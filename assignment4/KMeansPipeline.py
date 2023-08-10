@@ -28,7 +28,7 @@ class KMeansPipeline(Pipeline):
                     algo = KMeans(n_clusters=k, random_state=42)
                     clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
                     dataset_results[k] = clustering_metrics
-                self.optimal_k.plot_optimal_k_figure(dataset_name, 'SSE-Elbow', dataset_results)
+                self.optimal_k.plot_optimal_k_figure('K-Means', dataset_name, 'SSE-Elbow', dataset_results)
                 results[dataset_name] = dataset_results
             return results
         except Exception as e:

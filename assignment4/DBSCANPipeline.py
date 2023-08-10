@@ -26,7 +26,7 @@ class DBSCANPipeline(Pipeline):
                     algo = DBSCAN(min_samples=min_samples, eps=eps_dict[dataset_name])
                     clustering_metrics = self.measure_clustering_metrics(min_samples, algo, dataset)
                     dataset_results[min_samples] = clustering_metrics
-                self.optimal_k.plot_optimal_k_figure(dataset_name, 'SSE-Elbow', dataset_results)
+                self.optimal_k.plot_optimal_k_figure('DBSCAN', dataset_name, 'SSE-Elbow', dataset_results)
                 results[dataset_name] = dataset_results
             return results
         except Exception as e:

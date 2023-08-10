@@ -26,7 +26,7 @@ class AgglomerativePipeline(Pipeline):  # 2. Rename the class to AgglomerativePi
                     algo = AgglomerativeClustering(n_clusters=k)  # Use AgglomerativeClustering
                     clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
                     dataset_results[k] = clustering_metrics
-                self.optimal_k.plot_optimal_k_figure(dataset_name, 'SSE-Elbow', dataset_results)
+                self.optimal_k.plot_optimal_k_figure('Agglomerative', dataset_name, 'SSE-Elbow', dataset_results)
                 results[dataset_name] = dataset_results
             return results
         except Exception as e:

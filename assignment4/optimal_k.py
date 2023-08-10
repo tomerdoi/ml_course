@@ -119,7 +119,8 @@ class OptimalK:
         capitalized_words = [word.capitalize() for word in words]
         return ' '.join(capitalized_words)
 
-    def plot_optimal_k_figure(self, dataset_name: str, metric_name: str, dataset_results: Dict[int, Dict[str, float]]):
+    def plot_optimal_k_figure(self, algo: str, dataset_name: str, metric_name: str,
+                              dataset_results: Dict[int, Dict[str, float]]):
         try:
             self.logger.info('Plotting Elbow figure for dataset %s and metric %s.' % (dataset_name, metric_name))
             K = list(dataset_results.keys())
@@ -130,8 +131,8 @@ class OptimalK:
             dataset_name = self._underscore_to_capital_space(dataset_name)
             plt.xlabel('Number of Clusters (k)')
             plt.ylabel('%s Score' % metric_name)
-            plt.title('%s Metric for Optimal k for dataset %s' % (metric_name, dataset_name))
-            plt.savefig(f'{dataset_name} {metric_name}.png')
+            plt.title('%s Algo %s Metric for Optimal k for dataset %s' % (algo, metric_name, dataset_name))
+            plt.savefig(f'{algo} {dataset_name} {metric_name}.png')
             plt.show()
             # Clean up and reset Matplotlib state
             plt.close('all')
