@@ -128,7 +128,7 @@ class OptimalK:
             plt.xlabel('Number of Clusters (k)')
             plt.ylabel('%s Score' % metric_name)
             plt.title('%s Metric for Optimal k for dataset %s' % (metric_name, dataset_name))
-            plt.savefig(metric_name + '.png')
+            plt.savefig(f'{dataset_name} {metric_name}.png')
             plt.show()
         except Exception as e:
             self.logger.error('Exception %s occurred during plot_optimal_k_figure.' % e)
