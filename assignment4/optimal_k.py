@@ -19,7 +19,7 @@ class OptimalK:
     # todo: Need to run 1 time on 1 K value and get results, and not iterating over multiple K values
     def elbow_method_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list) -> float:
         try:
-            clustering_model.n_clusters = k
+            # clustering_model.n_clusters = k
             if isinstance(clustering_model, DBSCAN):
                 # Get the core points and their coordinates
                 core_samples_mask = np.zeros_like(labels, dtype=bool)
@@ -62,7 +62,7 @@ class OptimalK:
 
     def variance_ratio_criterion_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
         try:
-            clustering_model.n_clusters = k
+            # clustering_model.n_clusters = k
             unique_labels = len(set(labels))
             if unique_labels < 2 or unique_labels >= len(data):
                 return None  # Return None to indicate inability to evaluate clustering
@@ -73,7 +73,7 @@ class OptimalK:
 
     def davies_bouldin_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
         try:
-            clustering_model.n_clusters = k
+            # clustering_model.n_clusters = k
             unique_labels = len(set(labels))
             if unique_labels < 2 or unique_labels >= len(data):
                 return None  # Return None to indicate inability to evaluate clustering
@@ -84,7 +84,7 @@ class OptimalK:
 
     def silhouette_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
         try:
-            clustering_model.n_clusters = k
+            # clustering_model.n_clusters = k
             unique_labels = len(set(labels))
             if unique_labels < 2 or unique_labels >= len(data):
                 return None  # Return None to indicate inability to evaluate clustering
