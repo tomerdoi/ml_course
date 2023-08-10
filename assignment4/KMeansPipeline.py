@@ -26,7 +26,7 @@ class KMeansPipeline(Pipeline):
                         self.logger.info(f"Stopped running since the number of clusters ({k}) is bigger than the "
                                          f"number of samples ({samples})")
                         break
-                    algo = KMeans(n_clusters=k)
+                    algo = KMeans(n_clusters=k, random_state=42)
                     clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
                     dataset_results[k] = clustering_metrics
                 self.optimal_k.plot_optimal_k_figure(dataset_name, 'SSE-Elbow', dataset_results)
