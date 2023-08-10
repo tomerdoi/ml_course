@@ -14,7 +14,7 @@ from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silho
 class OptimalK:
     def __init__(self):
         self.logger_util = LoggerUtils()
-        self.logger = self.logger_util.init_logger(log_file_name='optimal_k.log')
+        self.logger = self.logger_util.init_logger(log_file_name='pipeline.log')
 
     # todo: Need to run 1 time on 1 K value and get results, and not iterating over multiple K values
     def elbow_method_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list) -> float:
@@ -56,6 +56,8 @@ class OptimalK:
                 metric_value = clustering_model.inertia_  # SSE value for the current k
             else:
                 return None
+            if metric_value:
+                print(f'K: {k}, SSE: {metric_value}')
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during elbow_method_metric.' % e)
@@ -119,6 +121,7 @@ class OptimalK:
 
     def plot_optimal_k_figure(self, dataset_name: str, metric_name: str, dataset_results: Dict[int, Dict[str, float]]):
         try:
+            self.logger.info('Plotting Elbow figure for dataset %s and metric %s.' % (dataset_name, metric_name))
             K = list(dataset_results.keys())
             scores = [result[metric_name] for result in dataset_results.values()]
             plt.figure(figsize=(8, 5))
@@ -130,6 +133,13 @@ class OptimalK:
             plt.title('%s Metric for Optimal k for dataset %s' % (metric_name, dataset_name))
             plt.savefig(f'{dataset_name} {metric_name}.png')
             plt.show()
+            # Clean up and reset Matplotlib state
+            plt.close('all')
+            plt.clf()
+            plt.cla()
+            plt.close()
+            # Optional: Reset Matplotlib's interactive mode
+            plt.ioff()
         except Exception as e:
             self.logger.error('Exception %s occurred during plot_optimal_k_figure.' % e)
 

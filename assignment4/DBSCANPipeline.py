@@ -6,7 +6,7 @@ from dataset_handler import DatasetHandler
 class DBSCANPipeline(Pipeline):
     def __init__(self):
         super().__init__()  # Call the parent class constructor first
-        self.logger = self.logger_util.init_logger(log_file_name='dbscan_pipeline.log')
+        self.logger = self.logger_util.init_logger(log_file_name='pipeline.log')
 
     def run_pipeline(self, datasets):
         try:

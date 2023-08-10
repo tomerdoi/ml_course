@@ -9,7 +9,7 @@ from dataset_handler import DatasetHandler
 class KMeansPipeline(Pipeline):
     def __init__(self):
         super().__init__()  # Call the parent class constructor first
-        self.logger = self.logger_util.init_logger(log_file_name='kmeans_pipeline.log')
+        self.logger = self.logger_util.init_logger(log_file_name='pipeline.log')
 
     def run_pipeline(self, datasets: Dict[str, pd.DataFrame]) -> dict:
         try:
@@ -21,7 +21,6 @@ class KMeansPipeline(Pipeline):
                 samples = len(dataset)
                 dataset_results = {}
                 for k in k_values:
-                    print(f"K = {k}")
                     if k > samples:
                         self.logger.info(f"Stopped running since the number of clusters ({k}) is bigger than the "
                                          f"number of samples ({samples})")

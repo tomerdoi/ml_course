@@ -6,7 +6,7 @@ from pipeline import Pipeline
 class AgglomerativePipeline(Pipeline):  # 2. Rename the class to AgglomerativePipeline
     def __init__(self):
         super().__init__()  # Call the parent class constructor first
-        self.logger = self.logger_util.init_logger(log_file_name='agglomerative_pipeline.log')
+        self.logger = self.logger_util.init_logger(log_file_name='pipeline.log')
 
     def run_pipeline(self, datasets):
         try:

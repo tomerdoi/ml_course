@@ -6,7 +6,7 @@ from dataset_handler import DatasetHandler
 class OPTICSPipeline(Pipeline):  # 2. Rename the class to OPTICSPipeline
     def __init__(self):
         super().__init__()  # Call the parent class constructor first
-        self.logger = self.logger_util.init_logger(log_file_name='optics_pipeline.log')
+        self.logger = self.logger_util.init_logger(log_file_name='pipeline.log')
 
     def run_pipeline(self, datasets):
         try:

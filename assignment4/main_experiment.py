@@ -16,7 +16,7 @@ warnings.filterwarnings('ignore')
 class MainExperiment:  # 2. Rename the class to AgglomerativePipeline
     def __init__(self):
         self.logger_util = LoggerUtils()
-        self.logger = self.logger_util.init_logger(log_file_name='main_experiment.log')
+        self.logger = self.logger_util.init_logger(log_file_name='pipeline.log')
         self.report_path = global_conf.report_path
         self.results = pd.DataFrame(columns=['Algorithm', 'Dataset', 'Hyper-parameter name', 'Hyper-parameter value',
                                              'Metric name', 'Metric value', 'Num clusters'])
