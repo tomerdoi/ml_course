@@ -11,7 +11,7 @@ class AgglomerativePipeline(Pipeline):  # 2. Rename the class to AgglomerativePi
     def run_pipeline(self, datasets):
         try:
             # todo: to check ranges, according to the assignments instructions it should include 1 which is impossible
-            k_values = list(range(2, 31)) + list(range(35, 100, 5)) + list(range(100, 1001, 25))
+            k_values = list(range(1, 21))
             results = {}
             for dataset_name, dataset in datasets.items():
                 print(f"Running Agglomerative pipeline for dataset: {dataset_name}")  # Update the message

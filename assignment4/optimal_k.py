@@ -21,10 +21,10 @@ class OptimalK:
             if len(set(labels)) == 1 and list(set(labels))[0] == -1:
                 return None
             if isinstance(clustering_model, DBSCAN) or isinstance(clustering_model, AgglomerativeClustering) or \
-                    isinstance(clustering_model, OPTICS):
+                    isinstance(clustering_model, OPTICS) or isinstance(clustering_model, KMeans):
                 metric_value = self.calculate_sse(data, labels)
-            elif isinstance(clustering_model, KMeans):
-                metric_value = clustering_model.inertia_  # SSE value for the current k
+            # elif isinstance(clustering_model, KMeans):
+            #     metric_value = clustering_model.inertia_  # SSE value for the current k
             else:
                 return None
             if metric_value:
@@ -121,7 +121,7 @@ class OptimalK:
             scores = [scores[i] for i in range(len(scores)) if i not in none_score_indices]
             plt.figure(figsize=(8, 5))
             plt.plot(K, scores, 'bx-')
-            metric_name = self._underscore_to_capital_space(metric_name)
+            # metric_name = self._underscore_to_capital_space(metric_name)
             dataset_name = self._underscore_to_capital_space(dataset_name)
             plt.xlabel('Number of Clusters (k)')
             plt.ylabel('%s Score' % metric_name)

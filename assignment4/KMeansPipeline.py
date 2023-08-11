@@ -14,7 +14,7 @@ class KMeansPipeline(Pipeline):
     def run_pipeline(self, datasets: Dict[str, pd.DataFrame]) -> dict:
         try:
             # todo: to check ranges, according to the assignments instructions it should include 1 which is impossible
-            k_values = list(range(2, 31)) + list(range(35, 100, 5)) + list(range(100, 1001, 25))
+            k_values = list(range(1, 31)) + list(range(35, 100, 5)) + list(range(100, 1001, 25))
             results = {}
             for dataset_name, dataset in datasets.items():
                 print(f"Running K-Means pipeline for dataset: {dataset_name}")
