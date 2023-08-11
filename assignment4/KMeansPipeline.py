@@ -23,7 +23,8 @@ class KMeansPipeline(Pipeline):
                     if k > samples:
                         self.logger.info(f"Stopped running since the number of clusters ({k}) is bigger than the "
                                          f"number of samples ({samples})")
-                        break
+                        dataset_results[k] = self.fill_in_invalid_run_metrics()
+                        continue
                     algo = KMeans(n_clusters=k, random_state=42)
                     clustering_metrics = self.measure_clustering_metrics('K', k, algo, dataset)
                     dataset_results[k] = clustering_metrics

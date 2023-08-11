@@ -20,7 +20,7 @@ class OptimalK:
             if len(set(labels)) == 1 and list(set(labels))[0] == -1:
                 self.logger.error('Exception occurred during elbow_method_metric, '
                                   'len(set(labels)) == 1 and list(set(labels))[0] == -1')
-                return None
+                return 0.0
             if isinstance(clustering_model, DBSCAN) or isinstance(clustering_model, AgglomerativeClustering) or \
                     isinstance(clustering_model, OPTICS) or (isinstance(clustering_model, KMeans)
                                                              and len(set(labels)) == 1):
@@ -28,7 +28,7 @@ class OptimalK:
             elif isinstance(clustering_model, KMeans):
                 metric_value = clustering_model.inertia_
             else:
-                return None
+                return 0.0
             if metric_value:
                 num_of_clusters = len(set(labels))
                 print(f'{hp_name}: {hp_value}, num_of_clusters: {num_of_clusters}, SSE: {metric_value}')
@@ -54,7 +54,7 @@ class OptimalK:
         try:
             unique_labels = len(set(labels))
             if unique_labels < 2 or unique_labels >= len(data):
-                return None  # Return None to indicate inability to evaluate clustering
+                return 0.0  # return 0.0 to indicate inability to evaluate clustering
             metric_value = calinski_harabasz_score(data, labels)
             return metric_value
         except Exception as e:
@@ -65,7 +65,7 @@ class OptimalK:
         try:
             unique_labels = len(set(labels))
             if unique_labels < 2 or unique_labels >= len(data):
-                return None  # Return None to indicate inability to evaluate clustering
+                return 0.0  # return 0.0 to indicate inability to evaluate clustering
             metric_value = davies_bouldin_score(data, labels)
             return metric_value
         except Exception as e:
@@ -76,7 +76,7 @@ class OptimalK:
         try:
             unique_labels = len(set(labels))
             if unique_labels < 2 or unique_labels >= len(data):
-                return None  # Return None to indicate inability to evaluate clustering
+                return 0.0  # return 0.0 to indicate inability to evaluate clustering
             metric_value = silhouette_score(data, labels)
             return metric_value
         except Exception as e:
@@ -88,7 +88,7 @@ class OptimalK:
             # Calculate the maximum possible Davies-Bouldin Index for single-sample clusters
             unique_labels = len(set(labels))
             if unique_labels < 2 or unique_labels >= len(data):
-                return None  # Return None to indicate inability to evaluate clustering
+                return 0.0  # return 0.0 to indicate inability to evaluate clustering
             true_labels = np.array(true_labels).reshape(-1, 1)
             max_dbi = davies_bouldin_score(data, true_labels)
             clustering_model.n_clusters = hp_value
@@ -131,8 +131,10 @@ class OptimalK:
             none_score_indices = [i for i in range(len(scores)) if scores[i] is None]
             self.logger.info('none_score_indices for algo %s and metric %s is: %d' % (algo, metric_name,
                                                                                       len(none_score_indices)))
-            K = [K[i] for i in range(len(K)) if i not in none_score_indices]
-            scores = [scores[i] for i in range(len(scores)) if i not in none_score_indices]
+            scores = [scores[i] for i in range(len(scores)) if i not in none_score_indices and K[i] > 0]
+            K = [K[i] for i in range(len(K)) if i not in none_score_indices and K[i] > 0]
+            K = [K[i] for i in range(len(K)) if scores[i] > 0]
+            scores = [scores[i] for i in range(len(scores)) if scores[i] > 0]
             plt.figure(figsize=(8, 5))
             plt.plot(K, scores, 'bx-')
             dataset_name = self._underscore_to_capital_space(dataset_name)

@@ -17,6 +17,21 @@ class Pipeline(ABC):
     def run_pipeline(self, datasets) -> dict:
         raise NotImplemented
 
+    def fill_in_invalid_run_metrics(self):
+        try:
+            metrics = {
+                'num_of_clusters': 0,
+                'unique_labels': [],
+                'SSE-Elbow': 0.0,
+                'VRC': 0.0,
+                'DB': 0.0,
+                'Silhouette': 0.0,
+                'My_clustring_metric': 0.0
+            }
+            return metrics
+        except Exception as e:
+            self.logger.error('Exception %s occurred during fill_in_invalid_run_metrics.' % e)
+
     def measure_clustering_metrics(self, hp_name: str, hp_value: int, clustering_model: ClusterMixin,
                                    dataset: pd.DataFrame):
         try:

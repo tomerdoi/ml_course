@@ -21,7 +21,8 @@ class AgglomerativePipeline(Pipeline):  # 2. Rename the class to AgglomerativePi
                     if k > samples:
                         self.logger.info(f"Stopped running since the number of clusters ({k}) is bigger than the "
                                          f"number of samples ({samples})")
-                        break
+                        dataset_results[k] = self.fill_in_invalid_run_metrics()
+                        continue
                     algo = AgglomerativeClustering(n_clusters=k)  # Use AgglomerativeClustering
                     clustering_metrics = self.measure_clustering_metrics('K', k, algo, dataset)
                     dataset_results[k] = clustering_metrics

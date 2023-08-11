@@ -46,6 +46,7 @@ class MainExperiment:  # 2. Rename the class to AgglomerativePipeline
                     unique_labels = results[ds_name][hp_value].pop('unique_labels')
                     if len(unique_labels) == 1 and list(unique_labels)[0] == -1:
                         num_of_clusters = 0
+                        results[ds_name][hp_value].pop('num_of_clusters')
                     else:
                         num_of_clusters = results[ds_name][hp_value].pop('num_of_clusters')
                     for metric_name in results[ds_name][hp_value]:
