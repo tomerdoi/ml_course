@@ -26,7 +26,7 @@ class KMeansPipeline(Pipeline):
                                          f"number of samples ({samples})")
                         break
                     algo = KMeans(n_clusters=k, random_state=42)
-                    clustering_metrics = self.measure_clustering_metrics(k, algo, dataset)
+                    clustering_metrics = self.measure_clustering_metrics('K', k, algo, dataset)
                     dataset_results[k] = clustering_metrics
                 self.optimal_k.plot_optimal_k_figure('K-Means', dataset_name, 'SSE-Elbow', dataset_results)
                 results[dataset_name] = dataset_results

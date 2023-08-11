@@ -17,7 +17,8 @@ class OptimalK:
         self.logger = self.logger_util.init_logger(log_file_name='pipeline.log')
 
     # todo: Need to run 1 time on 1 K value and get results, and not iterating over multiple K values
-    def elbow_method_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list) -> float:
+    def elbow_method_metric(self, hp_name: str, hp_value: int, clustering_model: ClusterMixin, data: pd.DataFrame,
+                            labels: list) -> float:
         try:
             # clustering_model.n_clusters = k
             if len(set(labels)) == 1 and list(set(labels))[0] == -1:
@@ -59,12 +60,13 @@ class OptimalK:
             else:
                 return None
             if metric_value:
-                print(f'K: {k}, SSE: {metric_value}')
+                print(f'{hp_name}: {hp_value}, SSE: {metric_value}')
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during elbow_method_metric.' % e)
 
-    def variance_ratio_criterion_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
+    def variance_ratio_criterion_metric(self, hp_name: str, hp_value: int, clustering_model: ClusterMixin,
+                                        data: pd.DataFrame, labels: list):
         try:
             # clustering_model.n_clusters = k
             unique_labels = len(set(labels))
@@ -75,7 +77,8 @@ class OptimalK:
         except Exception as e:
             self.logger.error('Exception %s occurred during variance_ratio_criterion_metric.' % e)
 
-    def davies_bouldin_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
+    def davies_bouldin_metric(self, hp_name: str, hp_value: int, clustering_model: ClusterMixin, data: pd.DataFrame,
+                              labels: list):
         try:
             # clustering_model.n_clusters = k
             unique_labels = len(set(labels))
@@ -86,7 +89,8 @@ class OptimalK:
         except Exception as e:
             self.logger.error('Exception %s occurred during davies_bouldin_metric.' % e)
 
-    def silhouette_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list):
+    def silhouette_metric(self, hp_name: str, hp_value: int, clustering_model: ClusterMixin, data: pd.DataFrame,
+                          labels: list):
         try:
             # clustering_model.n_clusters = k
             unique_labels = len(set(labels))
@@ -97,8 +101,8 @@ class OptimalK:
         except Exception as e:
             self.logger.error('Exception %s occurred during silhouette_metric.' % e)
 
-    def custom_clustering_validity_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame,
-                                          labels: list, true_labels: list):
+    def custom_clustering_validity_metric(self, hp_name: str, hp_value: int, clustering_model: ClusterMixin,
+                                          data: pd.DataFrame, labels: list, true_labels: list):
         try:
             # Calculate the maximum possible Davies-Bouldin Index for single-sample clusters
             unique_labels = len(set(labels))
@@ -106,7 +110,7 @@ class OptimalK:
                 return None  # Return None to indicate inability to evaluate clustering
             true_labels = np.array(true_labels).reshape(-1, 1)
             max_dbi = davies_bouldin_score(data, true_labels)
-            clustering_model.n_clusters = k
+            clustering_model.n_clusters = hp_value
             db_score = davies_bouldin_score(data, labels)
             # Normalize the Davies-Bouldin Index by dividing by the maximum possible score
             db_normalized = db_score / max_dbi

@@ -17,7 +17,8 @@ class Pipeline(ABC):
     def run_pipeline(self, datasets) -> dict:
         raise NotImplemented
 
-    def measure_clustering_metrics(self, k: int, clustering_model: ClusterMixin, dataset: pd.DataFrame):
+    def measure_clustering_metrics(self, hp_name: str, hp_value: int, clustering_model: ClusterMixin,
+                                   dataset: pd.DataFrame):
         try:
             # drop the last column of the dataset
             true_labels = dataset.iloc[:, -1].tolist()
@@ -28,12 +29,14 @@ class Pipeline(ABC):
             metrics = {
                 'num_of_clusters': num_of_clusters,
                 'unique_labels': unique_labels,
-                'SSE-Elbow': self.optimal_k.elbow_method_metric(k, clustering_model, dataset, labels),
-                'VRC': self.optimal_k.variance_ratio_criterion_metric(k, clustering_model, dataset, labels),
-                'DB': self.optimal_k.davies_bouldin_metric(k, clustering_model, dataset, labels),
-                'Silhouette': self.optimal_k.silhouette_metric(k, clustering_model, dataset, labels),
-                'My_clustring_metric': self.optimal_k.custom_clustering_validity_metric(k, clustering_model,
-                                                                                        dataset, labels, true_labels)
+                'SSE-Elbow': self.optimal_k.elbow_method_metric(hp_name, hp_value, clustering_model, dataset, labels),
+                'VRC': self.optimal_k.variance_ratio_criterion_metric(hp_name, hp_value, clustering_model, dataset,
+                                                                      labels),
+                'DB': self.optimal_k.davies_bouldin_metric(hp_name, hp_value, clustering_model, dataset, labels),
+                'Silhouette': self.optimal_k.silhouette_metric(hp_name, hp_value, clustering_model, dataset, labels),
+                'My_clustring_metric': self.optimal_k.custom_clustering_validity_metric(hp_name, hp_value,
+                                                                                        clustering_model, dataset,
+                                                                                        labels, true_labels)
             }
             return metrics
         except Exception as e:
