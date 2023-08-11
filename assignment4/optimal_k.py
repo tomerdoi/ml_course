@@ -139,7 +139,7 @@ class OptimalK:
             plt.xlabel('Number of Clusters (k)')
             plt.ylabel('%s Score' % metric_name)
             plt.title('%s Algo %s Metric for Optimal k for dataset %s' % (algo, metric_name, dataset_name))
-            plt.savefig(f'./{algo} {dataset_name} {metric_name}.png')
+            plt.savefig(f'./figures/{algo} {dataset_name} {metric_name}.png')
             plt.show()
             # Clean up and reset Matplotlib state
             plt.close('all')
