@@ -17,7 +17,6 @@ class OPTICSPipeline(Pipeline):  # 2. Rename the class to OPTICSPipeline
                 print(f"Running OPTICS pipeline for dataset: {dataset_name}")  # Update the message
                 dataset_results = {}
                 for min_samples in min_samples_values:
-                    print(f"min_samples = {min_samples}")
                     algo = OPTICS(min_samples=min_samples)  # Use OPTICS and set min_samples=k
                     clustering_metrics = self.measure_clustering_metrics('min_samples', min_samples, algo, dataset)
                     dataset_results[min_samples] = clustering_metrics

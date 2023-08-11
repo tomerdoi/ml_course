@@ -22,7 +22,6 @@ class DBSCANPipeline(Pipeline):
                 dataset_results = {}
                 min_samples_list = min_samples_dict[dataset_name]
                 for min_samples in min_samples_list:
-                    print(f"min_samples = {min_samples}")
                     algo = DBSCAN(min_samples=min_samples, eps=eps_dict[dataset_name])
                     clustering_metrics = self.measure_clustering_metrics('min_samples', min_samples, algo, dataset)
                     dataset_results[min_samples] = clustering_metrics

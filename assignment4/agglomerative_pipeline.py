@@ -18,7 +18,6 @@ class AgglomerativePipeline(Pipeline):  # 2. Rename the class to AgglomerativePi
                 samples = len(dataset)
                 dataset_results = {}
                 for k in k_values:
-                    print(f"K = {k}")
                     if k > samples:
                         self.logger.info(f"Stopped running since the number of clusters ({k}) is bigger than the "
                                          f"number of samples ({samples})")
