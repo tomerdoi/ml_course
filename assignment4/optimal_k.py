@@ -23,38 +23,9 @@ class OptimalK:
             # clustering_model.n_clusters = k
             if len(set(labels)) == 1 and list(set(labels))[0] == -1:
                 return None
-            if isinstance(clustering_model, DBSCAN):
-                # Get the core points and their coordinates
-                core_samples_mask = np.zeros_like(labels, dtype=bool)
-                core_samples_mask[clustering_model.core_sample_indices_] = True
-                core_points = data[core_samples_mask]
-                # Ensure that core_points is 2D even if it contains only one core point
-                if len(core_points.shape) == 1:
-                    core_points = core_points.reshape(1, -1)
-                # Calculate distances between all points and core points
-                distances = cdist(data, core_points)
-                # Find the nearest core point for each non-core point
-                nearest_core_indices = np.min(distances, axis=1)
-                metric_value = np.sum([dist ** 2 for dist in nearest_core_indices])
-            elif isinstance(clustering_model, AgglomerativeClustering):
-                linkage_matrix = clustering_model.children_
-                # Calculate the number of data points in each merged cluster
-                n_samples = data.shape[0]
-                cluster_sizes = np.zeros(2 * n_samples - 1)
-                cluster_sizes[:n_samples] = 1
-                for i in range(n_samples - 1, 2 * n_samples - 1):
-                    child_1, child_2 = linkage_matrix[i - n_samples]
-                    cluster_sizes[i] = cluster_sizes[child_1] + cluster_sizes[child_2]
-                # Calculate the SSE value for the current k
-                centers = np.array([data[labels == j].mean(axis=0) for j in range(len(labels))])
-                distances = cdist(data, centers, 'euclidean')
-                sse_per_cluster = np.array([np.sum(distances[labels == j] ** 2) for j in range(len(labels))])
-                metric_value = np.sum(sse_per_cluster)
-            elif isinstance(clustering_model, OPTICS):
-                # Calculate the OPTICS SSE variant considering only finite reachability distances
-                reachability_distances = clustering_model.reachability_
-                finite_reachability_distances = reachability_distances[np.isfinite(reachability_distances)]
-                metric_value = np.sum(finite_reachability_distances ** 2)
+            if isinstance(clustering_model, DBSCAN) or isinstance(clustering_model, AgglomerativeClustering) or \
+                    isinstance(clustering_model, OPTICS):
+                metric_value = self.calculate_sse(data, labels)
             elif isinstance(clustering_model, KMeans):
                 metric_value = clustering_model.inertia_  # SSE value for the current k
             else:
@@ -65,6 +36,19 @@ class OptimalK:
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during elbow_method_metric.' % e)
+
+    def calculate_sse(self, dataset, labels):
+        try:
+            unique_labels = np.unique(labels)
+            sse = 0
+            for label in unique_labels:
+                cluster_points = dataset[labels == label]
+                centroid = np.mean(cluster_points, axis=0)
+                squared_distances = np.sum(np.linalg.norm(cluster_points - centroid, axis=1) ** 2)
+                sse += squared_distances
+            return sse
+        except Exception as e:
+            self.logger.error('Exception %s occurred during calculate_agglomerative_sse.' % e)
 
     def variance_ratio_criterion_metric(self, hp_name: str, hp_value: int, clustering_model: ClusterMixin,
                                         data: pd.DataFrame, labels: list):

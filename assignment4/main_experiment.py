@@ -63,8 +63,7 @@ class MainExperiment:  # 2. Rename the class to AgglomerativePipeline
         try:
             self.logger.info('Loading datasets.')
             datasets = self.load_datasets()
-            # self.algo_experiment('K-Means', datasets, 'K', KMeansPipeline())
-            datasets = {'parking_birmingham_ds': datasets['parking_birmingham_ds']}
+            self.algo_experiment('K-Means', datasets, 'K', KMeansPipeline())
             self.algo_experiment('DBSCAN', datasets, 'min_samples', DBSCANPipeline())
             self.algo_experiment('Agglomerative', datasets, 'K', AgglomerativePipeline())
             self.algo_experiment('OPTICS', datasets, 'min_samples', OPTICSPipeline())
