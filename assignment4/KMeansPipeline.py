@@ -1,5 +1,4 @@
 from typing import Dict
-
 import pandas as pd
 from sklearn.cluster import KMeans
 from pipeline import Pipeline
