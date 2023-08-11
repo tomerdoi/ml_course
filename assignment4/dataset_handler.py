@@ -1,6 +1,9 @@
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from gensim.models import Word2Vec
 from sklearn.preprocessing import StandardScaler
 from logger_utils import LoggerUtils
 
@@ -28,6 +31,38 @@ class DatasetHandler:
             return data
         except Exception as e:
             self.logger.error('Exception %s occurred during load_south_german_credit.' % e)
+
+    def load_icmla_2014_accepted_papers_data_set_word2vec(self):
+        try:
+            csv_file_path = './datasets/icmla+2014+accepted+papers+data+set/ICMLA_2014.csv'
+            data = pd.read_csv(csv_file_path, encoding='ISO-8859-1')
+            # Combine all the textual data into a single column for processing
+            textual_columns = ['paper_title', 'author_keywords', 'abstract']
+            data['combined_text'] = data[textual_columns].apply(lambda x: ' '.join(x), axis=1)
+            # Train Word2Vec model on the combined text
+            sentences = [text.split() for text in data['combined_text']]
+            word2vec_model = Word2Vec(sentences, vector_size=100, window=5, min_count=1,
+                                      sg=0)  # You can adjust parameters
+            # Get word embeddings for each document's combined text
+            embeddings = []
+            for text in sentences:
+                text_embeddings = [word2vec_model.wv[word] for word in text if word in word2vec_model.wv]
+                if text_embeddings:
+                    embeddings.append(sum(text_embeddings) / len(text_embeddings))
+                else:
+                    embeddings.append([0] * word2vec_model.vector_size)  # Use a zero vector if no embeddings are found
+            # Convert embeddings to DataFrame
+            embedding_df = pd.DataFrame(embeddings, columns=[f'emb_{i}' for i in range(word2vec_model.vector_size)])
+            # Concatenate the original DataFrame with the embedding DataFrame
+            df_numeric = pd.concat([data.drop(columns=textual_columns), embedding_df], axis=1)
+            df_numeric.drop('combined_text', axis=1, inplace=True)
+            # Standardize the DataFrame except for the 'session' column
+            columns_to_standardize = [col for col in df_numeric.columns if col != 'session']
+            df_numeric[columns_to_standardize] = self.standardize_df(df_numeric[columns_to_standardize])
+            df_numeric = df_numeric[[col for col in df_numeric.columns if col != 'session'] + ['session']]
+            return df_numeric
+        except Exception as e:
+            self.logger.error('Exception %s occurred during load_icmla_2014_accepted_papers_data_set_word2vec.' % e)
 
     def load_icmla_2014_accepted_papers_data_set(self):
         try:
@@ -95,6 +130,6 @@ class DatasetHandler:
 if __name__ == '__main__':
     dataset_handler = DatasetHandler()
     south_german_credit_data = dataset_handler.load_south_german_credit()
-    icmla_2014_accepted_papers_data = dataset_handler.load_icmla_2014_accepted_papers_data_set()
+    icmla_2014_accepted_papers_data = dataset_handler.load_icmla_2014_accepted_papers_data_set_word2vec()
     parking_birmingham_data = dataset_handler.load_parking_birmingham_data_set()
     pass

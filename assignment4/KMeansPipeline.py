@@ -40,7 +40,7 @@ if __name__ == '__main__':
     # For example: datasets = {'dataset1': df1, 'dataset2': df2, ...}
     ds_handler = DatasetHandler()
     south_german_credit_ds = ds_handler.load_south_german_credit()
-    icmla_2014_accepted_papers_ds = ds_handler.load_icmla_2014_accepted_papers_data_set()
+    icmla_2014_accepted_papers_ds = ds_handler.load_icmla_2014_accepted_papers_data_set_word2vec()
     parking_birmingham_ds = ds_handler.load_parking_birmingham_data_set()
     datasets = {'south_german_credit_ds': south_german_credit_ds,
                 'icmla_2014_accepted_papers_ds': icmla_2014_accepted_papers_ds,

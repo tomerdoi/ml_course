@@ -12,10 +12,10 @@ class DBSCANPipeline(Pipeline):
         try:
             min_samples_dict = {'south_german_credit_ds': list(range(2, 22)),
                                 'parking_birmingham_ds': list(range(10, 210, 10)),
-                                'icmla_2014_accepted_papers_ds': list(range(1, 100, 5))}
+                                'icmla_2014_accepted_papers_ds': list(range(1, 21, 1))}
             eps_dict = {'south_german_credit_ds': 3.0,
                         'parking_birmingham_ds': 0.5,
-                        'icmla_2014_accepted_papers_ds': 70.0}
+                        'icmla_2014_accepted_papers_ds': 3.0}
             results = {}
             for dataset_name, dataset in datasets.items():
                 print(f"Running DBSCAN pipeline for dataset: {dataset_name}")
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # For example: datasets = {'dataset1': df1, 'dataset2': df2, ...}
     ds_handler = DatasetHandler()
     south_german_credit_ds = ds_handler.load_south_german_credit()
-    icmla_2014_accepted_papers_ds = ds_handler.load_icmla_2014_accepted_papers_data_set()
+    icmla_2014_accepted_papers_ds = ds_handler.load_icmla_2014_accepted_papers_data_set_word2vec()
     parking_birmingham_ds = ds_handler.load_parking_birmingham_data_set()
     datasets = {'south_german_credit_ds': south_german_credit_ds,
                 'parking_birmingham_ds': parking_birmingham_ds,
