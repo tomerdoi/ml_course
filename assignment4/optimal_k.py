@@ -22,8 +22,11 @@ class OptimalK:
                                   'len(set(labels)) == 1 and list(set(labels))[0] == -1')
                 return None
             if isinstance(clustering_model, DBSCAN) or isinstance(clustering_model, AgglomerativeClustering) or \
-                    isinstance(clustering_model, OPTICS) or isinstance(clustering_model, KMeans):
+                    isinstance(clustering_model, OPTICS) or (isinstance(clustering_model, KMeans)
+                                                             and len(set(labels)) == 1):
                 metric_value = self.calculate_sse(data, labels)
+            elif isinstance(clustering_model, KMeans):
+                metric_value = clustering_model.inertia_
             else:
                 return None
             if metric_value:
