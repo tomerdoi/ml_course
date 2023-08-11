@@ -1,12 +1,9 @@
 from typing import Dict
-
 from sklearn.base import ClusterMixin
 from sklearn.cluster import DBSCAN, AgglomerativeClustering, OPTICS, KMeans
-
 from logger_utils import LoggerUtils
 import pandas as pd
 import numpy as np
-from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silhouette_score
 
