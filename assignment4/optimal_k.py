@@ -46,9 +46,9 @@ class OptimalK:
                     child_1, child_2 = linkage_matrix[i - n_samples]
                     cluster_sizes[i] = cluster_sizes[child_1] + cluster_sizes[child_2]
                 # Calculate the SSE value for the current k
-                centers = np.array([data[labels == j].mean(axis=0) for j in range(k)])
+                centers = np.array([data[labels == j].mean(axis=0) for j in range(len(labels))])
                 distances = cdist(data, centers, 'euclidean')
-                sse_per_cluster = np.array([np.sum(distances[labels == j] ** 2) for j in range(k)])
+                sse_per_cluster = np.array([np.sum(distances[labels == j] ** 2) for j in range(len(labels))])
                 metric_value = np.sum(sse_per_cluster)
             elif isinstance(clustering_model, OPTICS):
                 # Calculate the OPTICS SSE variant considering only finite reachability distances
@@ -60,7 +60,8 @@ class OptimalK:
             else:
                 return None
             if metric_value:
-                print(f'{hp_name}: {hp_value}, SSE: {metric_value}')
+                num_of_clusters = len(set(labels))
+                print(f'{hp_name}: {hp_value}, num_of_clusters: {num_of_clusters}, SSE: {metric_value}')
             return metric_value
         except Exception as e:
             self.logger.error('Exception %s occurred during elbow_method_metric.' % e)

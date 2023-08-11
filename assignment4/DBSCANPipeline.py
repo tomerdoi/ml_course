@@ -21,6 +21,7 @@ class DBSCANPipeline(Pipeline):
                 print(f"Running DBSCAN pipeline for dataset: {dataset_name}")
                 dataset_results = {}
                 min_samples_list = min_samples_dict[dataset_name]
+                min_samples_list = min_samples_list[:5]
                 for min_samples in min_samples_list:
                     print(f"min_samples = {min_samples}")
                     algo = DBSCAN(min_samples=min_samples, eps=eps_dict[dataset_name])
