@@ -1,8 +1,10 @@
+import re
+
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from gensim.models import Word2Vec
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from logger_utils import LoggerUtils
 
 
@@ -31,9 +33,31 @@ class DatasetHandler:
             self.logger.error('Exception %s occurred during load_south_german_credit.' % e)
 
     def load_icmla_2014_accepted_papers_data_set_word2vec(self):
+        def clean_keyword(val: str):
+            val = ' '.join(val.split(','))
+            val = ' '.join(val.split(';'))
+            val.replace('-', ' ')
+            pattern = re.compile(r'[^a-zA-Z\d ]')
+            val = pattern.sub('', val)
+            return val.lower()
+
+        def clean_text(val: str):
+            val = val.replace('-', ' ')
+            val = val.replace("'s", '')
+            pattern = re.compile(r'[^a-zA-Z\d ]')
+            val = pattern.sub('', val)
+            return val.lower()
         try:
+            le = LabelEncoder()
             csv_file_path = './datasets/icmla+2014+accepted+papers+data+set/ICMLA_2014.csv'
             data = pd.read_csv(csv_file_path, encoding='ISO-8859-1')
+
+            data.drop(columns=['paper_id'], inplace=True)
+            data.paper_title = data.paper_title.apply(clean_text)
+            data.abstract = data.abstract.apply(clean_text)
+            data.author_keywords = data.author_keywords.apply(clean_keyword)
+            data.session = le.fit_transform(data.session)
+
             # Combine all the textual data into a single column for processing
             textual_columns = ['paper_title', 'author_keywords', 'abstract']
             data['combined_text'] = data[textual_columns].apply(lambda x: ' '.join(x), axis=1)
@@ -66,6 +90,7 @@ class DatasetHandler:
         try:
             csv_file_path = './datasets/icmla+2014+accepted+papers+data+set/ICMLA_2014.csv'
             data = pd.read_csv(csv_file_path, encoding='ISO-8859-1')
+            data.drop(columns=['paper_id'], inplace=True)
             # convert text features to numeric
             # Create a list of the textual columns to convert
             textual_columns = ['paper_title', 'author_keywords', 'abstract']
