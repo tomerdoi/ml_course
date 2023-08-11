@@ -24,7 +24,9 @@ class Pipeline(ABC):
             dataset = dataset.drop(dataset.columns[-1], axis=1)
             labels = clustering_model.fit_predict(dataset)
             unique_labels = np.unique(labels).tolist()
+            num_of_clusters = len(set(labels))
             metrics = {
+                'num_of_clusters': num_of_clusters,
                 'unique_labels': unique_labels,
                 'SSE-Elbow': self.optimal_k.elbow_method_metric(k, clustering_model, dataset, labels),
                 'VRC': self.optimal_k.variance_ratio_criterion_metric(k, clustering_model, dataset, labels),

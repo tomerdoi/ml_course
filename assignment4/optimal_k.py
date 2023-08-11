@@ -20,6 +20,8 @@ class OptimalK:
     def elbow_method_metric(self, k: int, clustering_model: ClusterMixin, data: pd.DataFrame, labels: list) -> float:
         try:
             # clustering_model.n_clusters = k
+            if len(set(labels)) == 1 and list(set(labels))[0] == -1:
+                return None
             if isinstance(clustering_model, DBSCAN):
                 # Get the core points and their coordinates
                 core_samples_mask = np.zeros_like(labels, dtype=bool)
@@ -123,8 +125,14 @@ class OptimalK:
                               dataset_results: Dict[int, Dict[str, float]]):
         try:
             self.logger.info('Plotting Elbow figure for dataset %s and metric %s.' % (dataset_name, metric_name))
-            K = list(dataset_results.keys())
+            # K = list(dataset_results.keys())
+            K = [result['num_of_clusters'] for result in dataset_results.values()]
             scores = [result[metric_name] for result in dataset_results.values()]
+            none_score_indices = [i for i in range(len(scores)) if scores[i] is None]
+            self.logger.info('none_score_indices for algo %s and metric %s is: %d' % (algo, metric_name,
+                                                                                      len(none_score_indices)))
+            K = [K[i] for i in range(len(K)) if i not in none_score_indices]
+            scores = [scores[i] for i in range(len(scores)) if i not in none_score_indices]
             plt.figure(figsize=(8, 5))
             plt.plot(K, scores, 'bx-')
             metric_name = self._underscore_to_capital_space(metric_name)

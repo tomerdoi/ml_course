@@ -45,10 +45,14 @@ class MainExperiment:  # 2. Rename the class to AgglomerativePipeline
             for ds_name in results:
                 for hp_value in results[ds_name]:
                     unique_labels = results[ds_name][hp_value].pop('unique_labels')
+                    if len(unique_labels) == 1 and list(unique_labels)[0] == -1:
+                        num_of_clusters = 0
+                    else:
+                        num_of_clusters = results[ds_name][hp_value].pop('num_of_clusters')
                     for metric_name in results[ds_name][hp_value]:
                         metric_value = results[ds_name][hp_value][metric_name]
                         final_df.loc[len(final_df)] = [algo_name, ds_name, hyper_param_name, hp_value, metric_name,
-                                                       metric_value, unique_labels]
+                                                       metric_value, num_of_clusters]
 
             self.results = pd.concat([self.results, final_df], ignore_index=True)
             self.results.to_csv(self.report_path, index=False)
@@ -59,7 +63,7 @@ class MainExperiment:  # 2. Rename the class to AgglomerativePipeline
         try:
             self.logger.info('Loading datasets.')
             datasets = self.load_datasets()
-            self.algo_experiment('K-Means', datasets, 'K', KMeansPipeline())
+            # self.algo_experiment('K-Means', datasets, 'K', KMeansPipeline())
             self.algo_experiment('DBSCAN', datasets, 'min_samples', DBSCANPipeline())
             self.algo_experiment('Agglomerative', datasets, 'K', AgglomerativePipeline())
             self.algo_experiment('OPTICS', datasets, 'min_samples', OPTICSPipeline())
