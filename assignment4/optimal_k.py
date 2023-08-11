@@ -106,12 +106,28 @@ class OptimalK:
         capitalized_words = [word.capitalize() for word in words]
         return ' '.join(capitalized_words)
 
+    def remove_scores_dup(self, K, scores):
+        try:
+            min_score_per_k = {}
+            for i in range(len(K)):
+                if min_score_per_k.get(K[i], None) is None:
+                    min_score_per_k[K[i]] = scores[i]
+                else:
+                    min_score_per_k[K[i]] = min(min_score_per_k[K[i]], scores[i])
+            min_score_per_k = dict(sorted(min_score_per_k.items()))
+            K = list(min_score_per_k.keys())
+            scores = list(min_score_per_k.values())
+            return K, scores
+        except Exception as e:
+            self.logger.error('Exception %s occurred during remove_scores_dup.' % e)
+
     def plot_optimal_k_figure(self, algo: str, dataset_name: str, metric_name: str,
                               dataset_results: Dict[int, Dict[str, float]]):
         try:
             self.logger.info('Plotting Elbow figure for dataset %s and metric %s.' % (dataset_name, metric_name))
             K = [result['num_of_clusters'] for result in dataset_results.values()]
             scores = [result[metric_name] for result in dataset_results.values()]
+            K, scores = self.remove_scores_dup(K, scores)
             none_score_indices = [i for i in range(len(scores)) if scores[i] is None]
             self.logger.info('none_score_indices for algo %s and metric %s is: %d' % (algo, metric_name,
                                                                                       len(none_score_indices)))
