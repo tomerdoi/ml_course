@@ -5,7 +5,6 @@ import pandas as pd
 import seaborn as sns
 from logger_utils import LoggerUtils
 from matplotlib import pyplot as plt
-from sklearn.base import ClusterMixin
 from sklearn.cluster import DBSCAN, OPTICS, AgglomerativeClustering, KMeans, SpectralClustering
 from sklearn.metrics import adjusted_rand_score
 from dataset_handler import DatasetHandler  # Make sure to import the DatasetHandler class
