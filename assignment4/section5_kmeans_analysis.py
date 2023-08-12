@@ -35,7 +35,7 @@ class Section5KmeansAnalysis:
                                  xytext=(elbow_k, 0.8 * max(metric_values)),
                                  arrowprops=dict(facecolor='red', arrowstyle='->'))
                 else:
-                    best_k, best_metric = self.find_best_k(k_values, metric_values)
+                    best_k, best_metric = self.find_best_k(k_values, metric_values, metric_name)
                     plt.annotate(f'Best K: K = {best_k}',
                                  xy=(best_k, best_metric),
                                  xytext=(best_k, 0.7 * max(metric_values)),
@@ -59,9 +59,9 @@ class Section5KmeansAnalysis:
             else:
                 start_index = 0
             # Calculate the second derivative of SSE
-            deltas = np.diff(list(sse_values)[start_index:end_index + 1], 2)
+            deltas = np.diff(np.diff(list(sse_values)[start_index:end_index + 1]))
             # Find the index where the second derivative changes significantly
-            elbow_index = np.argmax(deltas) + start_index + 1  # Adding start_index and 1 to account for np.diff
+            elbow_index = np.argmin(deltas) + 1  # Adding 1 to account for the double differentiation
             # Return the corresponding K value and its SSE value as the elbow point
             elbow_k = k_values[elbow_index]
             elbow_sse = list(sse_values)[elbow_index]
@@ -69,7 +69,7 @@ class Section5KmeansAnalysis:
         except Exception as e:
             self.logger.error('Exception %s occurred during find_elbow_k.' % e)
 
-    def find_best_k(self, k_values, metric_values):
+    def find_best_k(self, k_values, metric_values, metric_name):
         try:
             # Check if there is a sequence of trailing zeros in metric_values
             end_index = len(metric_values) - 1
@@ -79,10 +79,23 @@ class Section5KmeansAnalysis:
                 start_index = 1
             else:
                 start_index = 0
-            # You can implement your best K finding logic here
-            # For simplicity, I'll just return the index of the minimum metric value
-            min_metric_idx = np.argmin(list(metric_values)[start_index:end_index + 1])
-            return k_values[start_index + min_metric_idx], list(metric_values)[start_index + min_metric_idx]
+
+            # Different logic for different metrics
+            if metric_name == 'VRC':
+                # For VRC, look for the K with the highest metric value
+                max_metric_idx = np.argmax(list(metric_values)[start_index:end_index + 1])
+                return k_values[start_index + max_metric_idx], list(metric_values)[start_index + max_metric_idx]
+            elif metric_name in ('DB', 'My_clustring_metric'):
+                # For DB, look for the K with the lowest metric value
+                min_metric_idx = np.argmin(list(metric_values)[start_index:end_index + 1])
+                return k_values[start_index + min_metric_idx], list(metric_values)[start_index + min_metric_idx]
+            elif metric_name == 'Silhouette':
+                # For Silhouette, look for the K with the highest metric value
+                max_metric_idx = np.argmax(list(metric_values)[start_index:end_index + 1])
+                return k_values[start_index + max_metric_idx], list(metric_values)[start_index + max_metric_idx]
+            else:
+                # Handle other metrics if needed
+                return None, None
         except Exception as e:
             self.logger.error('Exception %s occurred during find_best_k.' % e)
 
