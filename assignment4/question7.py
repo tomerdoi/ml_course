@@ -39,7 +39,8 @@ class ClusteringEnsemble:
             plt.figure(figsize=(8, 6))
             sns.heatmap(ari_df, annot=True, cmap="YlGnBu", fmt=".3f", cbar=True)
             plt.title("Clustering Comparison Heat-Map (Adjusted Rand Index)")
-
+            # Ensure all elements are visible in the saved image
+            plt.tight_layout()
             # Save the figure
             figure_name = 'Clustering Comparison Heat-Map (Adjusted Rand Index)_%s' % self.figure_ext
             figure_path = './figures/%s.png' % figure_name
