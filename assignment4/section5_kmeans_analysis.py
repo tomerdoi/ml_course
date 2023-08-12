@@ -29,11 +29,17 @@ class Section5KmeansAnalysis:
                                            'K-Means')]['Metric value']
                 plt.plot(k_values, metric_values, marker='o', label=metric_name)
                 if metric_name == 'SSE-Elbow':
-                    elbow_k = self.find_elbow_k(k_values, metric_values)
-                    plt.axvline(x=elbow_k, color='r', linestyle='--', label='Elbow Point')
+                    elbow_k, elbow_sse = self.find_elbow_k(k_values, metric_values)
+                    plt.annotate(f'Elbow Point: K = {elbow_k}',
+                                 xy=(elbow_k, elbow_sse),
+                                 xytext=(elbow_k, 0.8 * max(metric_values)),
+                                 arrowprops=dict(facecolor='red', arrowstyle='->'))
                 else:
-                    best_k = self.find_best_k(k_values, metric_values)
-                    plt.axvline(x=best_k, color='g', linestyle='--', label='Best K')
+                    best_k, best_metric = self.find_best_k(k_values, metric_values)
+                    plt.annotate(f'Best K: K = {best_k}',
+                                 xy=(best_k, best_metric),
+                                 xytext=(best_k, 0.7 * max(metric_values)),
+                                 arrowprops=dict(facecolor='green', arrowstyle='->'))
                 plt.xlabel('Number of Clusters (K)')
                 plt.ylabel(metric_name)
                 plt.legend()
@@ -44,19 +50,23 @@ class Section5KmeansAnalysis:
 
     def find_elbow_k(self, k_values, sse_values):
         try:
-            # You can implement your elbow finding logic here
-            # For simplicity, I'll just return the index of the minimum SSE value
-            min_sse_idx = np.argmin(sse_values)
-            return k_values[min_sse_idx]
+            # Calculate the second derivative of SSE
+            deltas = np.diff(sse_values, 2)
+            # Find the index where the second derivative changes significantly
+            elbow_index = np.argmax(deltas) + 1  # Adding 1 to account for np.diff
+            # Return the corresponding K value as the elbow point
+            elbow_k = k_values[elbow_index]
+            elbow_sse = list(sse_values)[elbow_index]
+            return elbow_k, elbow_sse
         except Exception as e:
             self.logger.error('Exception %s occurred during find_elbow_k.' % e)
 
     def find_best_k(self, k_values, metric_values):
         try:
             # You can implement your best K finding logic here
-            # For simplicity, I'll just return the index of the maximum metric value
-            max_metric_idx = np.argmax(metric_values)
-            return k_values[max_metric_idx]
+            # For simplicity, I'll just return the index of the minimum metric value
+            min_metric_idx = np.argmin(metric_values)
+            return k_values[min_metric_idx], list(metric_values)[min_metric_idx]
         except Exception as e:
             self.logger.error('Exception %s occurred during find_best_k.' % e)
 
