@@ -21,7 +21,7 @@ class Section5KmeansAnalysis:
     def plot_elbow_and_metrics(self, dataset_name, metric_names):
         try:
             dataset_df = self.raw_metrics_df[self.raw_metrics_df['Dataset'] == dataset_name]
-            k_values = dataset_df['Hyper-parameter value'].unique()
+            k_values = dataset_df[dataset_df['Algorithm'] == 'K-Means']['Hyper-parameter value'].unique()
             for metric_name in metric_names:
                 plt.figure(figsize=(10, 6))
                 plt.title(f'{dataset_name} - {metric_name}')
