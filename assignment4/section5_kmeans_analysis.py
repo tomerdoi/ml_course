@@ -50,11 +50,19 @@ class Section5KmeansAnalysis:
 
     def find_elbow_k(self, k_values, sse_values):
         try:
+            # Check if there is a sequence of trailing zeros in sse_values
+            end_index = len(sse_values) - 1
+            while end_index >= 0 and list(sse_values)[end_index] == 0:
+                end_index -= 1
+            if list(sse_values)[0] == 0:
+                start_index = 1
+            else:
+                start_index = 0
             # Calculate the second derivative of SSE
-            deltas = np.diff(sse_values, 2)
+            deltas = np.diff(list(sse_values)[start_index:end_index + 1], 2)
             # Find the index where the second derivative changes significantly
-            elbow_index = np.argmax(deltas) + 1  # Adding 1 to account for np.diff
-            # Return the corresponding K value as the elbow point
+            elbow_index = np.argmax(deltas) + start_index + 1  # Adding start_index and 1 to account for np.diff
+            # Return the corresponding K value and its SSE value as the elbow point
             elbow_k = k_values[elbow_index]
             elbow_sse = list(sse_values)[elbow_index]
             return elbow_k, elbow_sse
@@ -63,10 +71,18 @@ class Section5KmeansAnalysis:
 
     def find_best_k(self, k_values, metric_values):
         try:
+            # Check if there is a sequence of trailing zeros in metric_values
+            end_index = len(metric_values) - 1
+            while end_index >= 0 and list(metric_values)[end_index] == 0:
+                end_index -= 1
+            if list(metric_values)[0] == 0:
+                start_index = 1
+            else:
+                start_index = 0
             # You can implement your best K finding logic here
             # For simplicity, I'll just return the index of the minimum metric value
-            min_metric_idx = np.argmin(metric_values)
-            return k_values[min_metric_idx], list(metric_values)[min_metric_idx]
+            min_metric_idx = np.argmin(list(metric_values)[start_index:end_index + 1])
+            return k_values[start_index + min_metric_idx], list(metric_values)[start_index + min_metric_idx]
         except Exception as e:
             self.logger.error('Exception %s occurred during find_best_k.' % e)
 
