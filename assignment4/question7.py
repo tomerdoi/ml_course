@@ -6,7 +6,7 @@ import seaborn as sns
 from logger_utils import LoggerUtils
 from matplotlib import pyplot as plt
 from sklearn.base import ClusterMixin
-from sklearn.cluster import DBSCAN, OPTICS, AgglomerativeClustering, KMeans
+from sklearn.cluster import DBSCAN, OPTICS, AgglomerativeClustering, KMeans, SpectralClustering
 from sklearn.metrics import adjusted_rand_score
 from dataset_handler import DatasetHandler  # Make sure to import the DatasetHandler class
 import wandb
@@ -66,8 +66,8 @@ class ClusteringEnsemble:
 
     def meta_clustering(self, affinity_matrix):
         try:
-            meta_alg = AgglomerativeClustering(n_clusters=2, linkage='average', affinity='precomputed')
-            meta_labels = meta_alg.fit_predict(affinity_matrix)
+            spectral_cluster = SpectralClustering(n_clusters=2, affinity='precomputed')
+            meta_labels = spectral_cluster.fit_predict(affinity_matrix)
             return meta_labels
         except Exception as e:
             self.logger.error('Exception %s occurred during meta_clustering.' % e)
