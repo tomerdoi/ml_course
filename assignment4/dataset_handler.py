@@ -49,7 +49,6 @@ class DatasetHandler:
             val = pattern.sub('', val)
             return val.lower()
         try:
-            le = LabelEncoder()
             csv_file_path = './datasets/icmla+2014+accepted+papers+data+set/ICMLA_2014.csv'
             data = pd.read_csv(csv_file_path, encoding='ISO-8859-1')
 
@@ -57,7 +56,6 @@ class DatasetHandler:
             data.paper_title = data.paper_title.apply(clean_text)
             data.abstract = data.abstract.apply(clean_text)
             data.author_keywords = data.author_keywords.apply(clean_keyword)
-            data.session = le.fit_transform(data.session)
 
             # Combine all the textual data into a single column for processing
             textual_columns = ['paper_title', 'author_keywords', 'abstract']
