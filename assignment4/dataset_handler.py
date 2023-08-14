@@ -2,6 +2,7 @@ import os.path
 import re
 import numpy as np
 import pandas as pd
+from pandas_profiling import ProfileReport
 from sklearn.feature_extraction.text import CountVectorizer
 from gensim.models import Word2Vec
 from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -12,6 +13,9 @@ class DatasetHandler:
     def __init__(self):
         self.logger_util = LoggerUtils()
         self.logger = self.logger_util.init_logger(log_file_name='pipeline.log')
+        self.raw_south_german_credit_data = None
+        self.raw_icmla_2014_accepted_papers_data = None
+        self.raw_parking_birmingham_data = None
 
     def load_south_german_credit(self):
         try:
@@ -27,6 +31,7 @@ class DatasetHandler:
                                'present_residence', 'property', 'age', 'other_installment_plans', 'housing',
                                'number_credits', 'job', 'people_liable', 'telephone', 'foreign_worker', 'credit_risk']
             data = pd.DataFrame(data, columns=desired_columns)
+            self.raw_south_german_credit_data = data.copy(deep=True)
             data = self.standardize_df(data)
             data.to_csv(f'{os.path.dirname(asc_file_path)}/preprocess.csv', index=False)
             return data
@@ -51,7 +56,7 @@ class DatasetHandler:
         try:
             csv_file_path = './datasets/icmla+2014+accepted+papers+data+set/ICMLA_2014.csv'
             data = pd.read_csv(csv_file_path, encoding='ISO-8859-1')
-
+            self.raw_icmla_2014_accepted_papers_data = data.copy(deep=True)
             data.drop(columns=['paper_id'], inplace=True)
             data.paper_title = data.paper_title.apply(clean_text)
             data.abstract = data.abstract.apply(clean_text)
@@ -120,6 +125,7 @@ class DatasetHandler:
         try:
             csv_file_path = './datasets/parking+birmingham/dataset.csv'
             data = pd.read_csv(csv_file_path)
+            self.raw_parking_birmingham_data = data.copy(deep=True)
             # Assuming you already have the DataFrame 'data' with the dataset
             # If 'LastUpdated' is not in datetime format, convert it to datetime first
             data['LastUpdated'] = pd.to_datetime(data['LastUpdated'])
@@ -156,10 +162,22 @@ class DatasetHandler:
         except Exception as e:
             self.logger.error('Exception %s occurred during standardize_df.' % e)
 
+    def datasets_eda(self):
+        try:
+            profile = ProfileReport(self.raw_south_german_credit_data)
+            profile.to_file("./reports/raw_south_german_credit_data_eda_report.html")
+            profile = ProfileReport(self.raw_icmla_2014_accepted_papers_data)
+            profile.to_file("./reports/raw_icmla_2014_accepted_papers_data_eda_report.html")
+            profile = ProfileReport(self.raw_parking_birmingham_data)
+            profile.to_file("./reports/raw_parking_birmingham_data_eda_report.html")
+        except Exception as e:
+            self.logger.error('Exception %s occurred during datasets_eda.' % e)
+
 
 if __name__ == '__main__':
     dataset_handler = DatasetHandler()
     south_german_credit_data = dataset_handler.load_south_german_credit()
     icmla_2014_accepted_papers_data = dataset_handler.load_icmla_2014_accepted_papers_data_set_word2vec()
     parking_birmingham_data = dataset_handler.load_parking_birmingham_data_set()
+    dataset_handler.datasets_eda()
     pass
