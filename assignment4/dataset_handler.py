@@ -1,3 +1,4 @@
+import os.path
 import re
 import numpy as np
 import pandas as pd
@@ -32,6 +33,7 @@ class DatasetHandler:
             data = pd.DataFrame(data, columns=desired_columns)
             self.raw_south_german_credit_data = data.copy(deep=True)
             data = self.standardize_df(data)
+            data.to_csv(f'{os.path.dirname(asc_file_path)}/preprocess.csv', index=False)
             return data
         except Exception as e:
             self.logger.error('Exception %s occurred during load_south_german_credit.' % e)
@@ -86,6 +88,7 @@ class DatasetHandler:
             columns_to_standardize = [col for col in df_numeric.columns if col != 'session']
             df_numeric[columns_to_standardize] = self.standardize_df(df_numeric[columns_to_standardize])
             df_numeric = df_numeric[[col for col in df_numeric.columns if col != 'session'] + ['session']]
+            df_numeric.to_csv(f'{os.path.dirname(csv_file_path)}/preprocess.csv', index=False)
             return df_numeric
         except Exception as e:
             self.logger.error('Exception %s occurred during load_icmla_2014_accepted_papers_data_set_word2vec.' % e)
@@ -114,11 +117,13 @@ class DatasetHandler:
             # Drop the 'combined_text' column
             df_numeric.drop('combined_text', axis=1, inplace=True)
             df_numeric = self.standardize_df(df_numeric)
+            df_numeric.to_csv(f'{os.path.dirname(csv_file_path)}/preprocess.csv', index=False)
             return df_numeric
         except Exception as e:
             self.logger.error('Exception %s occurred during load_icmla_2014_accepted_papers_data_set.' % e)
 
     def load_parking_birmingham_data_set(self):
+        le = LabelEncoder()
         try:
             csv_file_path = './datasets/parking+birmingham/dataset.csv'
             data = pd.read_csv(csv_file_path)
@@ -129,11 +134,16 @@ class DatasetHandler:
             # Convert 'LastUpdated' to numeric (timestamp) representation
             # in some os the default int is int32 which not compatible with the pandas datetime
             data['LastUpdated'] = data['LastUpdated'].astype(np.int64)
+
+            # Transpose the cluster label into numerics
+            data['SystemCodeNumber'] = le.fit_transform(data['SystemCodeNumber'])
+
             # Move the 'SystemCodeNumber' column to the last position
             data = data[[col for col in data.columns if col != 'SystemCodeNumber'] + ['SystemCodeNumber']]
             # Now 'data' has the 'LastUpdated' column converted to numeric and 'SystemCodeNumber'
             # moved to the last position
             data = self.standardize_df(data)
+            data.to_csv(f'{os.path.dirname(csv_file_path)}/preprocess.csv', index=False)
             return data
         except Exception as e:
             self.logger.error('Exception %s occurred during load_parking_birmingham_data_set.' % e)
